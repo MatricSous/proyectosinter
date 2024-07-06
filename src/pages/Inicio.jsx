@@ -1,6 +1,6 @@
-import { Card, Button, Row, Col, Pagination } from 'antd';
-import React, { useState, useEffect } from 'react';
-import { SearchOutlined } from '@ant-design/icons';
+import { Card, Button, Row, Col, Pagination, Modal, Input } from 'antd';
+import { SearchOutlined, FileAddOutlined, FileImageOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from 'react';
 import project1Image from '../images/test.jpg';
 import project1Image2 from '../images/image-1@2x.png';
 import { useNavigate } from 'react-router-dom';
@@ -37,11 +37,14 @@ const projects = [
 
 const PAGE_SIZE = 8; // Number of cards per page
 
-const Inicio = () => {
+const Proyectos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible2, setIsModalVisible2] = useState(false);
+  const fileInputRef = useRef(null);
+  const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
 
   useEffect(() => {
     if (transitioning) {
@@ -52,6 +55,47 @@ const Inicio = () => {
 
   const navigate = useNavigate(); // Initialize useNavigate
 
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredProjects = projects.filter((project) =>
+    project.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Aquí puedes manejar la imagen cargada como necesites
+      console.log('Imagen cargada:', file);
+    }
+  };
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const showModalv2 = () => {
+    setIsModalVisible(true);
+    window.location.href = '/proyecto#/Proyectos/1/Proyecto';
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel2 = () => {
+    setIsModalVisible2(false);
+  };
+
+  const Buscador = () => {
+    setIsModalVisible2(true);
+  };
+
   const handlePageChange = (page) => {
     setTransitioning(true);
     setTimeout(() => {
@@ -60,11 +104,7 @@ const Inicio = () => {
   };
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const currentProjects = projects.slice(startIndex, startIndex + PAGE_SIZE);
-
-  const Buscador = () => {
-    setIsModalVisible(true);
-  };
+  const currentProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
 
   return (
     <div>
@@ -114,6 +154,38 @@ const Inicio = () => {
           </Col>
         </Row>
       </div>
+      <Modal
+        style={{ marginTop: '200px' }}
+        visible={isModalVisible2}
+        footer={null}
+        onCancel={handleCancel2}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <Input
+            placeholder="Buscar por nombre del proyecto"
+            style={{ marginBottom: '10px', width: '80%' }}
+            onChange={handleSearchChange}
+          />
+          <Button
+            shape="round"
+            type="primary"
+            icon={<SearchOutlined />}
+            iconPosition={position}
+            onClick={handleCancel2}
+            style={{ width: '300px', height: '40px', fontSize: '18px' }}
+          >
+            Buscar
+          </Button>
+        </div>
+      </Modal>
       <Row
         justify="center"
         gutter={[16, 16]}
@@ -178,4 +250,4 @@ const Inicio = () => {
   );
 };
 
-export default Inicio;
+export default Proyectos;
