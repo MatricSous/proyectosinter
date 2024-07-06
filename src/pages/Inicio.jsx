@@ -1,5 +1,6 @@
 import { Card, Button, Row, Col, Pagination } from 'antd';
 import React, { useState, useEffect } from 'react';
+import { SearchOutlined } from '@ant-design/icons';
 import project1Image from '../images/test.jpg';
 import project1Image2 from '../images/image-1@2x.png';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +40,8 @@ const PAGE_SIZE = 8; // Number of cards per page
 const Inicio = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
+  const [position, setPosition] = useState('end');
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     if (transitioning) {
@@ -59,8 +62,58 @@ const Inicio = () => {
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const currentProjects = projects.slice(startIndex, startIndex + PAGE_SIZE);
 
+  const Buscador = () => {
+    setIsModalVisible(true);
+  };
+
   return (
     <div>
+      <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+        <Row justify="center" gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={8} lg={6} style={{ textAlign: 'center' }}>
+            <Button
+              type="primary"
+              style={{ width: '80px', height: '40px' }}
+              icon={<SearchOutlined style={{ fontSize: '30px' }} />}
+              iconPosition={position}
+              shape="round"
+              onClick={Buscador}
+            ></Button>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6} style={{ textAlign: 'center' }}>
+            <Button
+              disabled
+              style={{
+                border: '1px solid #d9d9d9',
+                backgroundColor: '#f5f5f5',
+                color: '#999',
+                cursor: 'not-allowed',
+                height: '40px',
+                fontSize: '18px',
+              }}
+              shape="round"
+            >
+              #Arquitectura
+            </Button>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6} style={{ textAlign: 'center' }}>
+            <Button
+              disabled
+              style={{
+                border: '1px solid #d9d9d9',
+                backgroundColor: '#f5f5f5',
+                color: '#999',
+                cursor: 'not-allowed',
+                height: '40px',
+                fontSize: '18px',
+              }}
+              shape="round"
+            >
+              #Infraestructura
+            </Button>
+          </Col>
+        </Row>
+      </div>
       <Row
         justify="center"
         gutter={[16, 16]}

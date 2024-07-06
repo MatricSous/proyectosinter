@@ -21,10 +21,10 @@ const items = [
   {
     key: '2',
     icon: <MenuOutlined style={{ fontSize: '16pt' }} />,
-    title: 'Proyectos',
+    title: 'Mis proyectos',
     label: (
       <Link to={'/Proyectos'} style={{ color: '#FFFFFF' }}>
-        Proyectos
+        Mis proyectos
       </Link>
     ),
   },

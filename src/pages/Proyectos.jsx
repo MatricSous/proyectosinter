@@ -1,22 +1,10 @@
-import { Card, Table } from 'antd';
+import { Card, Button, Row, Col, Pagination, Modal, Input } from 'antd';
 import {
   SearchOutlined,
   FileAddOutlined,
   FileImageOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Divider,
-  Flex,
-  Radio,
-  Space,
-  Tooltip,
-  Row,
-  Col,
-  Modal,
-  Input,
-} from 'antd';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import project1Image from '../images/image.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -50,22 +38,34 @@ const projects = [
   { id: 27, title: 'Proyecto 27', image: project1Image },
 ];
 
+const PAGE_SIZE = 8; // Number of cards per page
+
 const Proyectos = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
 
-  // Función para manejar cambios en el término de búsqueda
+  useEffect(() => {
+    if (transitioning) {
+      const timer = setTimeout(() => setTransitioning(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [transitioning]);
+
+  const navigate = useNavigate(); // Initialize useNavigate
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Función para filtrar proyectos por término de búsqueda
-  const filteredProjects = projects.filter(project =>
+  const filteredProjects = projects.filter((project) =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
@@ -93,10 +93,19 @@ const Proyectos = () => {
   const handleCancel2 = () => {
     setIsModalVisible2(false);
   };
-  const Buscador=() =>{
+  const Buscador = () => {
     setIsModalVisible2(true);
-  }
-  const navigate = useNavigate(); // Initialize useNavigate
+  };
+
+  const handlePageChange = (page) => {
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentPage(page);
+    }, 300); // Duration of the transition animation
+  };
+
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const currentProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
 
   return (
     <div>
@@ -225,7 +234,7 @@ const Proyectos = () => {
         footer={null}
         onCancel={handleCancel2}
       >
-      <div
+        <div
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -234,7 +243,7 @@ const Proyectos = () => {
             height: '100%',
           }}
         >
-         <Input
+          <Input
             placeholder="Buscar por nombre del proyecto"
             style={{ marginBottom: '10px', width: '80%' }}
             onChange={handleSearchChange}
@@ -250,59 +259,66 @@ const Proyectos = () => {
             Buscar
           </Button>
         </div>
-
-
       </Modal>
-      <Row justify="center" gutter={[16, 16]} style={{ marginTop: '20px' }}>
-        {searchTerm
-          ? filteredProjects.map((project) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={project.id}>
-                <Card
-                  onClick={() => navigate(`/Proyectos/${project.id}/Proyecto`)}
-                  hoverable
-                  cover={
-                    <img
-                      alt={project.title}
-                      src={project.image}
-                      style={{
-                        backgroundColor: '#f5f5f5',
-                        height: '400px',
-                        objectFit: 'cover',
-                        width: '100%',
-                      }}
-                    />
-                  }
-                >
-                  <Card.Meta
-                    title={<div style={{ fontSize: '150%', marginTop: '10px' }}>{project.title}</div>}
+      <Row
+        justify="center"
+        gutter={[16, 16]}
+        style={{ marginTop: '20px', marginBottom: '20px' }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            opacity: transitioning ? 0 : 1,
+            transition: 'opacity 0.3s ease-in-out',
+            width: '100%',
+            justifyContent: 'center',
+          }}
+        >
+          {currentProjects.map((project) => (
+            <Col xs={24} sm={12} md={8} lg={6} key={project.id}>
+              <Card
+                onClick={() => navigate(`/Proyectos/${project.id}/Proyecto`)}
+                hoverable
+                style={{ marginBottom: '30px' }} // Add margin bottom to increase vertical spacing
+                cover={
+                  <img
+                    alt={project.title}
+                    src={project.image}
+                    style={{
+                      backgroundColor: '#f5f5f5',
+                      height: '200px',
+                      objectFit: 'cover',
+                      width: '100%',
+                    }}
                   />
-                </Card>
-              </Col>
-            ))
-          : projects.map((project) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={project.id}>
-                <Card
-                  onClick={() => navigate(`/Proyectos/${project.id}/Proyecto`)}
-                  hoverable
-                  cover={
-                    <img
-                      alt={project.title}
-                      src={project.image}
-                      style={{
-                        backgroundColor: '#f5f5f5',
-                        height: '400px',
-                        objectFit: 'cover',
-                        width: '100%',
-                      }}
-                    />
+                }
+              >
+                <Button disabled shape="round" style={{ marginBottom: '10px' }}>
+                  #Arquitectura
+                </Button>
+                <Button disabled shape="round" style={{ marginLeft: '10px' }}>
+                  #Infraestructura
+                </Button>
+                <Card.Meta
+                  title={
+                    <div style={{ fontSize: '120%', marginTop: '10px' }}>
+                      {project.title}
+                    </div>
                   }
-                >
-                  <Card.Meta
-                    title={<div style={{ fontSize: '150%', marginTop: '10px' }}>{project.title}</div>}
-                  />
-                </Card>
-              </Col>
-            ))}
+                />
+              </Card>
+            </Col>
+          ))}
+        </div>
+      </Row>
+      <Row justify="center" style={{ marginTop: '20px' }}>
+        <Pagination
+          current={currentPage}
+          pageSize={PAGE_SIZE}
+          total={projects.length}
+          onChange={handlePageChange}
+        />
       </Row>
     </div>
   );
