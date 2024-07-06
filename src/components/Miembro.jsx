@@ -1,34 +1,34 @@
 import React, { useState } from 'react';
-import { Avatar, Row, Col, Modal, Input, Button } from 'antd';
-import { UserAddOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Row, Col, Modal, Input, Button, Space } from 'antd';
+import { UserAddOutlined, UserOutlined, CloseOutlined } from '@ant-design/icons';
 
-const UserCard = ({ name, isInvite, onInviteClick }) => (
-  <Col
-    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-  >
-    <div
-      style={{ textAlign: 'center', margin: '15px' }}
-      onClick={isInvite ? onInviteClick : null}
-    >
-      {isInvite ? (
+const UserCard = ({ member, onInviteClick, onRemoveClick }) => (
+  <Col style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ textAlign: 'center', margin: '15px', position: 'relative' }}>
+      {member.isInvite ? (
         <Avatar
           className="w-full h-full p-10"
-          // size={400}
-          icon={
-            <UserAddOutlined style={{ fontSize: '100px', color: '#b22222' }} />
-          }
+          icon={<UserAddOutlined style={{ fontSize: '100px', color: '#b22222' }} />}
           style={{ backgroundColor: '#f0f0f0', cursor: 'pointer' }}
+          onClick={onInviteClick}
         />
       ) : (
         <Avatar
           className="w-full h-full p-10"
           style={{ backgroundColor: '#d9d9d9' }}
-        >
-          <UserOutlined style={{ fontSize: '100px' }} />
-        </Avatar>
+          icon={<UserOutlined style={{ fontSize: '100px' }} />}
+        />
       )}
       <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
-        {name}
+        {member.name}
+        {!member.isInvite && (
+          <Space style={{ position: 'absolute', top: 0, right: 0 }}>
+            <CloseOutlined
+              style={{ fontSize: '18px', color: 'red', cursor: 'pointer' }}
+              onClick={() => onRemoveClick(member.id)}
+            />
+          </Space>
+        )}
       </div>
     </div>
   </Col>
@@ -36,6 +36,11 @@ const UserCard = ({ name, isInvite, onInviteClick }) => (
 
 const Miembros = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [members, setMembers] = useState([
+    { id: 1, name: 'Nombre usuario 1', isInvite: false },
+    { id: 2, name: 'Nombre usuario 2', isInvite: false },
+    
+  ]); // Ejemplo de lista de miembros inicial
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -46,24 +51,39 @@ const Miembros = () => {
   };
 
   const handleOk = () => {
-    // Logica de la invitacion // agregar la wea de los mails
+    // Lógica para agregar un nuevo miembro
     setIsModalVisible(false);
+  };
+
+  const addMember = (name) => {
+    const newMember = { id: members.length + 1, name, isInvite: false };
+    setMembers([...members, newMember]);
+  };
+
+  const removeMember = (id) => {
+    const updatedMembers = members.filter(member => member.id !== id);
+    setMembers(updatedMembers);
   };
 
   return (
     <div style={{ padding: '50px 20px', backgroundColor: '#fafafa' }}>
       <Row justify="space-around" align="middle">
-        <UserCard name="Nombre usuario" isInvite={false} />
-        <UserCard name="Nombre usuario" isInvite={false} />
+        {members.map(member => (
+          <UserCard
+            key={member.id}
+            member={member}
+            onRemoveClick={removeMember}
+            onInviteClick={showModal}
+          />
+        ))}
         <UserCard
-          name="Invitar Usuario"
-          isInvite={true}
+          member={{ id: 'invite', name: 'Invitar Usuario', isInvite: true }}
           onInviteClick={showModal}
         />
       </Row>
       <Modal
         title="Invitar Usuario"
-        open={isModalVisible}
+        visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
@@ -78,7 +98,7 @@ const Miembros = () => {
           style={{ marginBottom: '10px' }}
           onClick={handleOk}
         >
-          Enviar Invitacion
+          Enviar Invitación
         </Button>
         <Button block>Copiar Link de Invitación</Button>
       </Modal>

@@ -1,26 +1,35 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Typography } from 'antd';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import backgroundImage from '../images/image-1@2x.png'; // Import the image
+import { useNavigate } from 'react-router-dom';
+import backgroundImage from '../images/image-1@2x.png';
 
 const { Title } = Typography;
 
-export const Login = ({ className, buttonText = 'Login' }) => {
-  const navigate = useNavigate(); // Initialize useNavigate
+export const Login = ({ className, buttonText = 'Iniciar Sesión' }) => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado local para simular si el usuario está logueado
 
   const onFinish = (values) => {
+    // Simulación de inicio de sesión exitoso
     console.log('Success:', values);
-    navigate('/inicio'); // Redirect to another page using useNavigate
+    setIsLoggedIn(true); // Simular que el usuario ha iniciado sesión correctamente
+    navigate('/inicio'); // Redirigir a la página de inicio después del inicio de sesión
   };
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
 
+  // Si el usuario ya está logueado, redirigir directamente a la página de inicio
+  if (isLoggedIn) {
+    navigate('/inicio');
+    return null; // Opcional: puedes renderizar algo aquí mientras se redirige
+  }
+
   return (
     <div
-      className="login-container  h-screen"
+      className="login-container h-screen"
       style={{
         ...styles.container,
         backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`,
@@ -35,12 +44,12 @@ export const Login = ({ className, buttonText = 'Login' }) => {
           initialValues={{ remember: true }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
-          layout="vertical" // Set form layout to 'vertical'
+          layout="vertical"
         >
           <Form.Item
             label="Mail UDP"
             name="username"
-            rules={[{ required: true, message: 'Porfavor Ingrese su Correo' }]}
+            rules={[{ required: true, message: 'Por favor ingrese su correo' }]}
           >
             <Input />
           </Form.Item>
@@ -48,9 +57,7 @@ export const Login = ({ className, buttonText = 'Login' }) => {
           <Form.Item
             label="Contraseña"
             name="password"
-            rules={[
-              { required: true, message: 'Porfavor Ingrese su Contraseña' },
-            ]}
+            rules={[{ required: true, message: 'Por favor ingrese su contraseña' }]}
           >
             <Input.Password />
           </Form.Item>
@@ -80,7 +87,7 @@ export const Login = ({ className, buttonText = 'Login' }) => {
 
 Login.propTypes = {
   className: PropTypes.string,
-  buttonText: 'Iniciar Sesión',
+  buttonText: PropTypes.string,
 };
 
 Login.defaultProps = {
@@ -93,13 +100,12 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    // height: '100vh',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   },
   form: {
-    position: 'relative', // Set position to relative
-    zIndex: 1, // Set z-index to 1 to ensure form appears above overlay
+    position: 'relative',
+    zIndex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     padding: '2rem',
     borderRadius: '8px',
@@ -116,3 +122,5 @@ const styles = {
     width: '100%',
   },
 };
+
+export default Login;
