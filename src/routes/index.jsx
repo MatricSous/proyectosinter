@@ -10,7 +10,9 @@ import Proyecto from '../pages/Proyecto';
 import Subir from '../pages/Subir';
 import Referencia from '../pages/Referencia';
 import EmptyLayout from '../layouts/EmptyLayout';
-
+import Perfil from '../pages/Perfil';
+import ProyectoPublico from '../pages/Proyectopublico';
+import ProyectosPublicos from '../pages/Proyectopublico';
 const routes = [
   {
     path: '/',
@@ -62,6 +64,24 @@ const routes = [
     layout: MainLayout,
     element: Subir,
   },
+  {
+    path: '/Perfil',
+    layout: MainLayoutTop,
+    element: Perfil,
+  },
+  {
+    path: '/Proyectos/:id/Proyectopublico',
+    layout: MainLayoutTop,
+    element: ProyectoPublico,
+  },
+  {
+    path: '/Proyectospublicos',
+    layout: MainLayoutTop,
+    element: ProyectosPublicos,
+  },
+
+
+
 ];
 
 export default routes;

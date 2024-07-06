@@ -1,10 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Avatar, Card, Modal, Tag, Typography, Input, Button} from 'antd';
 import ScrollableContainer from '../components/ScrollableList';
-import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, WindowsOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, WindowsOutlined, MessageOutlined } from '@ant-design/icons';
 import UploadFile from '../components/UploadFile';
 import Miembro from '../components/Miembro';
 import { Link } from 'react-router-dom';
+import image from '../images/test2.jpg';
+import Foro from '../components/Foro';
+
 const { Title } = Typography;
 
 const placeholderUserImage =
@@ -21,7 +24,7 @@ const ProyectoPublico = () => {
     { name: 'Archivo 3', fileSize: '3.2 MB' },
     { name: 'Archivo 4', fileSize: '700 KB' },
   ];
-  const miembros = ['Miembro 1', 'Miembro 2', 'Miembro 3', 'Miembro 4'];
+  //const miembros = ['Miembro 1', 'Miembro 2', 'Miembro 3', 'Miembro 4'];
   const referentes = [
     'Referente 1',
     'Referente 2',
@@ -67,7 +70,7 @@ const ProyectoPublico = () => {
   );
 
   const renderReferente = (referente, index) => (
-    <Link to="/referencia" key={index}>
+    //<Link to="/referencia" key={index}>
     <Card
       key={index}
       className="min-w-[120px] min-h-[120px] flex-shrink-0 bg-gray-300"
@@ -76,7 +79,7 @@ const ProyectoPublico = () => {
 
       {/* {referente} */}
     </Card>
-    </Link>
+    //</Link>
   );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -129,7 +132,31 @@ const ProyectoPublico = () => {
     </Tag>
   );
 
+  const [isModalVisible4, setIsModalVisible4] = useState(false);
+
+  const handleModal4 = () => {
+    setIsModalVisible4(!isModalVisible4);
+  };
   
+  const handleModalMiembro1 = () => {
+    // Lógica para mostrar modal o realizar alguna acción al hacer clic en el icono
+    console.log('Mostrar modal para agregar miembro');
+  };
+
+  const renderMiembro1 = (miembro, index) => (
+    <div key={index} className="flex flex-col items-center">
+    <Avatar size={64} className="bg-gray-300" src={placeholderUserImage} />
+    <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>{miembro}</p>
+  </div>
+  );
+  const [members, setMembers] = useState([
+    { id: 1, name: 'Nombre usuario 1', isInvite: false },
+    { id: 2, name: 'Nombre usuario 2', isInvite: false },
+  ]); // Ejemplo de lista de miembros inicial
+
+  const miembros = members.map(member => member.name);
+
+    
   return (
     <>
       <Modal open={isModalVisible} onCancel={handleModal} width={'80%'}>
@@ -139,6 +166,11 @@ const ProyectoPublico = () => {
       <Modal open={isModalVisibleMiembro} onCancel={handleModalMiembro} width={'80%'}>
         <Miembro />
       </Modal>
+
+      <Modal open={isModalVisible4} onCancel={handleModal4} width={'80%'}>
+        <Foro />
+      </Modal>
+  
       <Modal
         visible={isModalVisible3}
         onCancel={handleModal3}
@@ -235,7 +267,19 @@ const ProyectoPublico = () => {
                 renderItem={renderTag}
                 maxVisibleItems={5}
               />
+              
+              <Title level={4} className="mb-2 text-center lg:text-left">
+              Comentarios
+              <MessageOutlined
+                className="ml-2"
+                size={20}
+                onClick={handleModal4}
+              />
+              </Title>
             </div>
+
+            
+
           </div>
           <div className="flex flex-col items-start w-full lg:w-auto">
             <div className="flex flex-row justify-start text-center mb-2">
@@ -247,14 +291,17 @@ const ProyectoPublico = () => {
             <div className="w-full">
               {archivos.map((archivo, index) => renderArchivo(archivo, index))}
             </div>
-            <Title level={4} className="mt-8 text-center lg:text-left">
-              Miembros
-            </Title>
-            <ScrollableContainer
-              items={miembros}
-              renderItem={renderMiembro}
-              maxVisibleItems={4}
-            />
+            <div>
+              <Title level={4} className="mt-8 text-center lg:text-left">
+                Miembros
+                
+              </Title>
+              <ScrollableContainer
+                items={miembros}
+                renderItem={renderMiembro1}
+                maxVisibleItems={5}
+              />
+            </div>
             <Title level={4} className="mt-8 text-center lg:text-left">
               Referentes
             </Title>
