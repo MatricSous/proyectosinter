@@ -7,6 +7,7 @@ import Miembro from '../components/Miembro';
 import { Link } from 'react-router-dom';
 import image from '../images/test2.jpg';
 import Foro from '../components/Foro';
+import Referencia from '../components/Referencia';
 
 const { Title } = Typography;
 
@@ -157,12 +158,20 @@ const Proyecto = () => {
     setIsModalVisible4(!isModalVisible4);
   };
   
+  const [isModalVisibleReferencia, setIsModalReferencia] = useState(false);
+
+  const handleModalReferencia = () => {
+    setIsModalReferencia(!isModalVisibleReferencia);
+  };
+
   return (
     <>
       <Modal open={isModalVisible} onCancel={handleModal} width={'80%'}>
         <UploadFile />
       </Modal>
-
+      <Modal open={isModalVisibleReferencia} onCancel={handleModalReferencia} width={'80%'}>
+        <Referencia />
+      </Modal>
       <Modal open={isModalVisibleMiembro} onCancel={handleModalMiembro} width={'80%'}>
         <Miembro />
       </Modal>
@@ -324,7 +333,13 @@ const Proyecto = () => {
             </div>
             <Title level={4} className="mt-8 text-center lg:text-left">
               Referentes
+              <PlusCircleOutlined
+                  className="ml-2"
+                  size={20}
+                  onClick={handleModalReferencia}
+                />
             </Title>
+            
             <ScrollableContainer
               items={referentes}
               renderItem={renderReferente}
