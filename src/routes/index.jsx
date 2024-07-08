@@ -1,5 +1,6 @@
 import MainLayout from '../layouts/MainLayout';
 import MainLayoutTop from '../layouts/MainLayoutTop';
+import MainLayoutAdmin from '../layouts/MainLayoutAdmin';
 import Home from '../pages/Home';
 import Usuarios from '../pages/Usuarios';
 import Proyectos from '../pages/Proyectos';
@@ -19,6 +20,9 @@ import { userAuthenticated } from '../app/authenticationSlice';
 
 
 
+import Admin from '../pages/Admin';
+import ProyectoAdmin from '../pages/ProyectoAdmin';
+//import Referencia from '../pages/Referencia';
 const routes = [
   {
     path: '/',
@@ -31,6 +35,21 @@ const routes = [
     element: Usuarios,
   },
   {
+    path: '/Admin',
+    layout: MainLayoutAdmin,
+    element: Admin,
+  },
+  {
+    path: '/PerfilAdmin',
+    layout: MainLayoutAdmin,
+    element: Perfil,
+  },
+  {
+    path: '/Admin/:id/ProyectoAdmin',
+    layout: MainLayoutAdmin,
+    element: ProyectoAdmin,
+  },
+  {
     path: '/Proyectos',
     layout: MainLayoutTop,
     element: Proyectos,
@@ -39,6 +58,11 @@ const routes = [
     path: '/Proyectos/:id/Proyecto',
     layout: MainLayoutTop,
     element: Proyecto,
+  },
+  {
+    path: '/Proyecto/:id/Referencia',
+    layout: MainLayoutTop,
+    element: Referencia,
   },
   {
     path: '/Miembros',
@@ -85,7 +109,7 @@ const routes = [
     layout: MainLayoutTop,
     element: ProyectosPublicos,
   },
-
+  
 
 
 ];

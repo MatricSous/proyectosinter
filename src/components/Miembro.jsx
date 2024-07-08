@@ -40,6 +40,7 @@ const Miembros = () => {
     { id: 1, name: 'Nombre usuario 1', isInvite: false },
     { id: 2, name: 'Nombre usuario 2', isInvite: false },
     
+    
   ]); // Ejemplo de lista de miembros inicial
 
   const showModal = () => {

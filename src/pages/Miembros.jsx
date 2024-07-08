@@ -55,6 +55,7 @@ const Miembros = () => {
       <Row justify="space-around" align="middle">
         <UserCard name="Nombre usuario" isInvite={false} />
         <UserCard name="Nombre usuario" isInvite={false} />
+        
         <UserCard
           name="Invitar Usuario"
           isInvite={true}
