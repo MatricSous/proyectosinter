@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Avatar, Card, Modal, Tag, Typography, Input, Button} from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Avatar, Card, Modal, Tag, Typography, Input, Button, Col, Popconfirm, message} from 'antd';
 import ScrollableContainer from '../components/ScrollableList';
-import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, WindowsOutlined, MessageOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, WindowsOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
 import UploadFile from '../components/UploadFile';
 import Miembro from '../components/Miembro';
 import { Link } from 'react-router-dom';
@@ -45,12 +46,10 @@ const Proyecto = () => {
     <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>{miembro}</p>
   </div>
   );
-  const referentes = [
-    'Referente 1',
-    'Referente 2',
-    'Referente 3',
-    'Referente 4',
-  ];
+  const [referentes, setreferentes] = useState([
+    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+  ]); // Ejemplo de lista de miembros inicial
   const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
 
   const renderArchivo = (archivo, index) => (
@@ -163,6 +162,48 @@ const Proyecto = () => {
   const handleModalReferencia = () => {
     setIsModalReferencia(!isModalVisibleReferencia);
   };
+
+  const navigate = useNavigate();
+
+  const renderReferente2 = (referente) => (
+    <Col xs={24} sm={12} md={8} lg={6} key={referente.id}>
+    <Card
+      onClick={() => navigate(`/Proyectos/${referente.id}/Referencia`)}
+      hoverable
+      style={{ marginBottom: '30px' , height: '100px'}}
+      cover={
+        <div
+          style={{
+            width: '100%',
+            height: '100px', // Ajusta la altura según sea necesario
+            overflow: 'hidden',
+          }}
+        >
+          <img 
+            alt={referente.title}
+            src={referente.image}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderBottomLeftRadius: '20px', // Asegúrate de que coincida con el contenedor
+              borderBottomRightRadius: '20px',
+            }}
+          />
+        </div>
+      }
+    >
+      <Card.Meta title={referente.title} />
+    </Card>
+  </Col>
+);
+
+const confirmDeleteProject = () => {
+  message.success('Proyecto eliminado correctamente');
+  // Aquí deberías añadir la lógica para eliminar el proyecto
+  // Por ahora, solo mostramos un mensaje de éxito
+};
+
 
   return (
     <>
@@ -342,10 +383,27 @@ const Proyecto = () => {
             
             <ScrollableContainer
               items={referentes}
-              renderItem={renderReferente}
+              renderItem={renderReferente2}
               maxVisibleItems={3}
-              
             />
+            <Title level={4} className="mt-8 text-center lg:text-left">
+                Eliminar Proyecto
+                
+                <Popconfirm
+                title="¿Estás seguro de eliminar este proyecto?"
+                onConfirm={confirmDeleteProject}
+                okText="Sí"
+                cancelText="No"
+                placement="bottom"
+              >
+                <Button
+                  type="danger"
+                  shape="circle"
+                  icon={<DeleteOutlined />}
+                  style={{ marginLeft: '10px' }}
+                />
+              </Popconfirm>
+              </Title>
           </div>
         </div>
       </div>

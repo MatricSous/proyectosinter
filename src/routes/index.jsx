@@ -15,6 +15,7 @@ import Perfil from '../pages/Perfil';
 import ProyectoPublico from '../pages/Proyectopublico';
 import ProyectosPublicos from '../pages/Proyectopublico';
 import Admin from '../pages/Admin';
+import ProyectoAdmin from '../pages/ProyectoAdmin';
 //import Referencia from '../pages/Referencia';
 const routes = [
   {
@@ -40,7 +41,7 @@ const routes = [
   {
     path: '/Admin/:id/ProyectoAdmin',
     layout: MainLayoutAdmin,
-    element: Proyecto,
+    element: ProyectoAdmin,
   },
   {
     path: '/Proyectos',
