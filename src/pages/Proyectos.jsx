@@ -7,6 +7,8 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 import project1Image from '../images/image.png';
 import { useNavigate } from 'react-router-dom';
+import { crearProyecto } from '../services/proyectos';
+import { useDispatch } from 'react-redux';
 
 const projects = [
   { id: 1, title: 'Universidad', image: project1Image },
@@ -41,6 +43,8 @@ const projects = [
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
+
+  const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');
@@ -48,6 +52,8 @@ const Proyectos = () => {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
+  const [fileName, setFileName] = useState(''); // State to store uploaded file name
+  const [projectTitle, setProjectTitle] = useState(''); // State to store project title
 
   useEffect(() => {
     if (transitioning) {
@@ -73,9 +79,13 @@ const Proyectos = () => {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Aquí puedes manejar la imagen cargada como necesites
-      console.log('Imagen cargada:', file);
+      // Set the file name to state
+      setFileName(file.name);
     }
+  };
+
+  const handleTitleChange = (event) => {
+    setProjectTitle(event.target.value);
   };
 
   const showModal = () => {
@@ -84,15 +94,16 @@ const Proyectos = () => {
 
   const showModalv2 = () => {
     setIsModalVisible(true);
-    window.location.href = '/proyecto#/Proyectos/1/Proyecto';
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
   };
+
   const handleCancel2 = () => {
     setIsModalVisible2(false);
   };
+
   const Buscador = () => {
     setIsModalVisible2(true);
   };
@@ -102,6 +113,30 @@ const Proyectos = () => {
     setTimeout(() => {
       setCurrentPage(page);
     }, 300); // Duration of the transition animation
+  };
+
+
+
+  const  handleCreateProject = async () => {
+    const newProject = {
+      titulo: projectTitle, // You can adjust this based on user input
+      foto: 'link/de/foto', // You need to implement the logic to get the actual link of the uploaded photo
+    };
+
+    try {
+      await crearProyecto(dispatch, newProject);
+      //navigate('/inicio'); // Redirect upon successful login
+    } catch (error) {
+      console.error('No se pudo crear proyecto:', error);
+    }
+    // Prepare data for POST request
+
+
+    // Simulate POST request (replace with actual API call)
+    console.log('Sending POST request with data:', newProject);
+
+    // After sending the request, close the modal
+    setIsModalVisible(false);
   };
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -119,7 +154,9 @@ const Proyectos = () => {
               iconPosition={position}
               shape="round"
               onClick={Buscador}
-            ></Button>
+            >
+              Buscar
+            </Button>
           </Col>
           <Col xs={24} sm={12} md={8} lg={6} style={{ textAlign: 'center' }}>
             <Button
@@ -193,6 +230,8 @@ const Proyectos = () => {
               borderRadius: '25px',
               height: '40px',
             }}
+            value={projectTitle}
+            onChange={handleTitleChange} // Update projectTitle state on change
           />
           <Button
             shape="round"
@@ -204,12 +243,15 @@ const Proyectos = () => {
           >
             Imagen de previsualización
           </Button>
+          {fileName && (
+            <p style={{ marginTop: '10px' }}>Nombre del archivo: {fileName}</p>
+          )}
           <Button
             shape="round"
             type="primary"
             icon={<FileAddOutlined />}
             iconPosition={position}
-            onClick={showModalv2}
+            onClick={handleCreateProject}
             style={{
               width: '250px',
               height: '40px',
