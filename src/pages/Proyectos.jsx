@@ -51,7 +51,6 @@ const projects = [
   { id: 27, title: 'Proyecto 27', image: project1Image , tags: getRandomTags()},
 ];
 
-
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
@@ -60,6 +59,9 @@ const Proyectos = () => {
   const [position, setPosition] = useState('end');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
+  const [projectName, setProjectName] = useState(''); // State for project name
+  const [tags, setTags] = useState([]); // State for tags
+  const [tagInput, setTagInput] = useState(''); // State for tag input
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
   const [tagSearchTerm, setTagSearchTerm] = useState(''); // Estado para la búsqueda por tag
@@ -139,7 +141,38 @@ const Proyectos = () => {
     setTagSearchTerm(event.target.value);
   };
 
-  
+  const handleTagInputChange = (event) => {
+    setTagInput(event.target.value);
+  };
+
+  const handleAddTag = () => {
+    if (tagInput && tags.length < 5) {
+      setTags([...tags, tagInput]);
+      setTagInput('');
+    }
+  };
+
+  const handleProjectNameChange = (event) => {
+    setProjectName(event.target.value);
+  };
+
+  const handleCreateProject = () => {
+    // Aquí puedes manejar la creación del proyecto
+    console.log('Nombre del proyecto:', projectName);
+    console.log('Tags del proyecto:', tags);
+    // Aquí puedes guardar los datos del proyecto, por ejemplo, enviarlos a un servidor
+
+    // Limpiar campos
+    setProjectName('');
+    setTags([]);
+    setIsModalVisible(false);
+    window.location.href = '/proyecto#/Proyectos/1/Proyecto';
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
   return (
     <div>
       <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
@@ -154,7 +187,6 @@ const Proyectos = () => {
               onClick={Buscador}
             ></Button>
           </Col>
-          
         </Row>
       </div>
       <Row justify="center" style={{ marginTop: '20px' }}>
@@ -189,13 +221,47 @@ const Proyectos = () => {
           <Input
             shape="round"
             placeholder="Nombre del Proyecto"
+            value={projectName}
+            onChange={handleProjectNameChange}
             style={{
-              marginBottom: '5px',
+              marginBottom: '10px',
               width: '300px',
               borderRadius: '25px',
               height: '40px',
             }}
           />
+          <Input
+            placeholder="Agregar etiqueta"
+            value={tagInput}
+            onChange={handleTagInputChange}
+            onPressEnter={handleAddTag}
+            style={{
+              marginBottom: '10px',
+              width: '300px',
+              borderRadius: '25px',
+              height: '40px',
+            }}
+          />
+          <Button
+            type="primary"
+            onClick={handleAddTag}
+            disabled={tags.length >= 5}
+            style={{ marginBottom: '10px' }}
+          >
+            Agregar Etiqueta
+          </Button>
+          <div style={{ marginBottom: '10px' }}>
+            {tags.map((tag, index) => (
+              <Button
+                key={index}
+                shape="round"
+                style={{ margin: '5px' }}
+                onClick={() => handleRemoveTag(tag)}
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
           <Button
             shape="round"
             type="primary"
@@ -211,7 +277,7 @@ const Proyectos = () => {
             type="primary"
             icon={<FileAddOutlined />}
             iconPosition={position}
-            onClick={showModalv2}
+            onClick={handleCreateProject}
             style={{
               width: '250px',
               height: '40px',
