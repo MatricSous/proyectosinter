@@ -190,7 +190,7 @@ const Proyecto = () => {
     // Aquí deberías añadir la lógica para eliminar el proyecto
   };
 
-  const autoridad = 4; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
+  const autoridad = 2; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
 
   return (
     <>

@@ -20,8 +20,6 @@ import { userAuthenticated } from '../app/authenticationSlice';
 import ImageGallery from '../pages/TesterImagenes';
 
 
-import Admin from '../pages/Admin';
-import ProyectoAdmin from '../pages/ProyectoAdmin';
 //import Referencia from '../pages/Referencia';
 const routes = [
   {
@@ -35,19 +33,9 @@ const routes = [
     element: Usuarios,
   },
   {
-    path: '/Admin',
-    layout: MainLayoutAdmin,
-    element: Admin,
-  },
-  {
     path: '/PerfilAdmin',
     layout: MainLayoutAdmin,
     element: Perfil,
-  },
-  {
-    path: '/Admin/:id/ProyectoAdmin',
-    layout: MainLayoutAdmin,
-    element: ProyectoAdmin,
   },
   {
     path: '/Proyectos',
