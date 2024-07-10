@@ -3,7 +3,9 @@ import { SearchOutlined, FileAddOutlined, FileImageOutlined } from '@ant-design/
 import React, { useState, useEffect, useRef } from 'react';
 import project1Image from '../images/test.jpg';
 import project1Image2 from '../images/image-1@2x.png';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useNavigate, Navigate } from 'react-router-dom'; // Import Navigate
+
 
 const getRandomTags = () => {
   const tags = ['Arquitectura', 'Infraestructura', 'Educación', 'Tecnología', 'Salud'];
@@ -51,6 +53,8 @@ const projects = [
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
+  
+  const {isLoggedIn} = useSelector(state => state.authenticationSlice);
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');
@@ -140,6 +144,10 @@ const Proyectos = () => {
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const currentProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
+  // Redirect to login if the user is not logged in
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div>

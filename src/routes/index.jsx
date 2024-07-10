@@ -14,6 +14,12 @@ import EmptyLayout from '../layouts/EmptyLayout';
 import Perfil from '../pages/Perfil';
 import ProyectoPublico from '../pages/Proyectopublico';
 import ProyectosPublicos from '../pages/Proyectopublico';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { userAuthenticated } from '../app/authenticationSlice';
+import ImageGallery from '../pages/TesterImagenes';
+
+
 import Admin from '../pages/Admin';
 import ProyectoAdmin from '../pages/ProyectoAdmin';
 //import Referencia from '../pages/Referencia';
@@ -102,6 +108,11 @@ const routes = [
     path: '/Proyectospublicos',
     layout: MainLayoutTop,
     element: ProyectosPublicos,
+  },
+  {
+    path: '/TestImg',
+    layout: MainLayoutTop,
+    element: ImageGallery,
   },
   
 
