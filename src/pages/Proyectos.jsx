@@ -92,6 +92,9 @@ const Proyectos = () => {
   const [position, setPosition] = useState('end');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
+  const [projectName, setProjectName] = useState(''); // State for project name
+  const [tags, setTags] = useState([]); // State for tags
+  const [tagInput, setTagInput] = useState(''); // State for tag input
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
   const [file, setFile] = useState(null); // State to store uploaded file
@@ -218,6 +221,56 @@ const Proyectos = () => {
 
   const paginatedProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
 
+  const currentProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const renderTags = (tags) => {
+    if (!tags || tags.length === 0) {
+      return null; // Si no hay tags, no renderizamos nada
+    }
+
+    return tags.map((tag, index) => (
+      <Button key={index} disabled shape="round" style={{ margin: '5px' }}>
+        {tag}
+      </Button>
+    ));
+  };
+
+  const handleTagSearchChange = (event) => {
+    setTagSearchTerm(event.target.value);
+  };
+
+  const handleTagInputChange = (event) => {
+    setTagInput(event.target.value);
+  };
+
+  const handleAddTag = () => {
+    if (tagInput && tags.length < 5) {
+      setTags([...tags, tagInput]);
+      setTagInput('');
+    }
+  };
+
+  const handleProjectNameChange = (event) => {
+    setProjectName(event.target.value);
+  };
+
+  const handleCreateProject = () => {
+    // Aquí puedes manejar la creación del proyecto
+    console.log('Nombre del proyecto:', projectName);
+    console.log('Tags del proyecto:', tags);
+    // Aquí puedes guardar los datos del proyecto, por ejemplo, enviarlos a un servidor
+
+    // Limpiar campos
+    setProjectName('');
+    setTags([]);
+    setIsModalVisible(false);
+    window.location.href = '/proyecto#/Proyectos/1/Proyecto';
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
   return (
     <>
       <div>
@@ -243,43 +296,6 @@ const Proyectos = () => {
               <FileAddOutlined /> Crear Proyecto
             </Button>
           </Col>
-        </Row>
-        <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
-          {paginatedProjects.map((project) => (
-            <Col key={project.id} span={6}>
-              <Card
-                hoverable
-                cover={<img alt={project.title} src={project.image} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />}
-                onClick={() => navigate(`/detallesproyectos/${project.id}`)} // Add onClick handler to navigate to project details
-              >
-                <Card.Meta title={project.title} />
-                <div style={{ marginTop: '10px' }}>
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      style={{
-                        display: 'inline-block',
-                        marginRight: '5px',
-                        padding: '2px 8px',
-                        borderRadius: '12px',
-                        backgroundColor: '#f0f0f0',
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Row justify="center" style={{ marginTop: '20px' }}>
-          <Pagination
-            current={currentPage}
-            pageSize={PAGE_SIZE}
-            total={filteredProjects.length}
-            onChange={handlePageChange}
-          />
         </Row>
       </div>
 
@@ -307,24 +323,86 @@ const Proyectos = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '100%',
-            marginTop: '20px',
+            height: '100%',
           }}
         >
-          <FileImageOutlined /> Subir Imagen
-        </Button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleImageUpload}
-        />
-        {fileName && (
-          <p style={{ marginTop: '10px' }}>Archivo seleccionado: {fileName}</p>
-        )}
-        {errorMessage && (
-          <p style={{ marginTop: '10px', color: 'red' }}>{errorMessage}</p>
-        )}
+          <Input
+            shape="round"
+            placeholder="Nombre del Proyecto"
+            value={projectName}
+            onChange={handleProjectNameChange}
+            style={{
+              marginBottom: '10px',
+              width: '300px',
+              borderRadius: '25px',
+              height: '40px',
+            }}
+          />
+          <Input
+            placeholder="Agregar etiqueta"
+            value={tagInput}
+            onChange={handleTagInputChange}
+            onPressEnter={handleAddTag}
+            style={{
+              marginBottom: '10px',
+              width: '300px',
+              borderRadius: '25px',
+              height: '40px',
+            }}
+          />
+          <Button
+            type="primary"
+            onClick={handleAddTag}
+            disabled={tags.length >= 5}
+            style={{ marginBottom: '10px' }}
+          >
+            Agregar Etiqueta
+          </Button>
+          <div style={{ marginBottom: '10px' }}>
+            {tags.map((tag, index) => (
+              <Button
+                key={index}
+                shape="round"
+                style={{ margin: '5px' }}
+                onClick={() => handleRemoveTag(tag)}
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
+          <Button
+            shape="round"
+            type="primary"
+            icon={<FileImageOutlined />}
+            iconPosition={position}
+            onClick={handleButtonClick}
+            style={{ width: '300px', height: '40px', fontSize: '18px' }}
+          >
+            Imagen de previsualización
+          </Button>
+          <Button
+            shape="round"
+            type="primary"
+            icon={<FileAddOutlined />}
+            iconPosition={position}
+            onClick={handleCreateProject}
+            style={{
+              width: '250px',
+              height: '40px',
+              fontSize: '18px',
+              marginTop: '20px',
+            }}
+          >
+            Crear Proyecto
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            accept="image/*"
+            onChange={handleImageUpload}
+          />
+        </div>
       </Modal>
     </>
   );
