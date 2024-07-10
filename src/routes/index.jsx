@@ -114,7 +114,11 @@ const routes = [
     layout: MainLayoutTop,
     element: ImageGallery,
   },
-  
+  {
+    path: '/Proyecto/:id',
+    layout: MainLayoutTop,
+    element: Proyecto,
+  },
 
 
 ];
