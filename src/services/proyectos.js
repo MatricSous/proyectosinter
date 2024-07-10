@@ -1,8 +1,9 @@
 import {
-    setExpenses, newProyecto, editExpense, deleteExpense,
+    setExpenses, setProyectoUsuario, newProyecto, editExpense, deleteExpense,
     setExpensesError, editExpenseError, newProyectoError, deleteExpenseError
 } from '../app/expenseSlice';
 import axios from 'axios';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 const axiosInstance = axios.create({    
     baseURL: `${process.env.REACT_APP_BASE_URL}ProyectosArqui`,
@@ -13,11 +14,13 @@ axiosInstance.interceptors.request.use((config) => {
     return config;
 });
 
-export const GetExpenses = async (dispatch) => {
+
+export const GetProyectosUsuario = async (dispatch) => {
     try {
         // api call
-        const { data } = await axiosInstance.get();
-        dispatch(setExpenses(data));
+        const { data } = await axiosInstance.get('/ProyectosUsuario');
+        dispatch(setProyectoUsuario(data));
+        console.log(data)
     } catch {
         dispatch(setExpensesError());
     }

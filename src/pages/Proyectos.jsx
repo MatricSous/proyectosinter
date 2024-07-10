@@ -7,8 +7,11 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 import project1Image from '../images/image.png';
 import { useNavigate } from 'react-router-dom';
-import { crearProyecto } from '../services/proyectos';
-import { useDispatch } from 'react-redux';
+import { crearProyecto, GetProyectosUsuario } from '../services/proyectos';
+import { useDispatch, useSelector } from 'react-redux';
+import {jwtDecode} from 'jwt-decode';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ImageDB } from '../Config';
 
 const getRandomTags = () => {
   const tags = ['Arquitectura', 'Infraestructura', 'Educación', 'Tecnología', 'Salud'];
@@ -53,12 +56,37 @@ const projects = [
   { id: 27, title: 'Proyecto 27', image: project1Image , tags: getRandomTags()},
 ];
 
-
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
-
+  const [transformed, setTransformed] = useState([]);
   const dispatch = useDispatch();
+  const proyectos = useSelector(state => state.expensesSlice.proyectosArray); // Corrected state path
+
+  useEffect(() => {
+    const fetchProyectos = async () => {
+      await GetProyectosUsuario(dispatch);
+    };
+    fetchProyectos();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (proyectos.length > 0) {
+      const transformedData = proyectos.map(project => ({
+        id: project.proyecto.id,
+        title: project.proyecto.titulo,
+        image: project.proyecto.foto,
+        tags: project.tagsProyecto.map(tag => tag.texto)
+      }));
+      setTransformed(transformedData);
+      console.log("transformed", transformedData);
+    }
+  }, [proyectos]);
+
+  useEffect(() => {
+    console.log("proyectos", proyectos); // This will log the updated proyectos after the state change
+  }, [proyectos]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');
@@ -66,9 +94,11 @@ const Proyectos = () => {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
+  const [file, setFile] = useState(null); // State to store uploaded file
   const [fileName, setFileName] = useState(''); // State to store uploaded file name
   const [projectTitle, setProjectTitle] = useState(''); // State to store project title
   const [tagSearchTerm, setTagSearchTerm] = useState(''); // Estado para la búsqueda por tag
+  const [errorMessage, setErrorMessage] = useState(''); // State to store error message
 
   useEffect(() => {
     if (transitioning) {
@@ -90,7 +120,8 @@ const Proyectos = () => {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Set the file name to state
+      // Set the file and file name to state
+      setFile(file);
       setFileName(file.name);
     }
   };
@@ -109,6 +140,7 @@ const Proyectos = () => {
 
   const handleCancel = () => {
     setIsModalVisible(false);
+    setErrorMessage(''); // Clear error message when modal is closed
   };
 
   const handleCancel2 = () => {
@@ -124,14 +156,13 @@ const Proyectos = () => {
     setTimeout(() => {
       setCurrentPage(page);
     }, 300); // Duration of the transition animation
+    console.log(proyectos)
   };
 
-
-
-  const  handleCreateProject = async () => {
+  const postProject = async (imgRef) => {
     const newProject = {
       titulo: projectTitle, // You can adjust this based on user input
-      foto: 'link/de/foto', // You need to implement the logic to get the actual link of the uploaded photo
+      foto: imgRef, // You need to implement the logic to get the actual link of the uploaded photo
     };
 
     try {
@@ -142,7 +173,6 @@ const Proyectos = () => {
     }
     // Prepare data for POST request
 
-
     // Simulate POST request (replace with actual API call)
     console.log('Sending POST request with data:', newProject);
 
@@ -150,223 +180,153 @@ const Proyectos = () => {
     setIsModalVisible(false);
   };
 
+  const handleCreateProject = async () => {
+    if (!file) {
+      setErrorMessage('Por favor, sube una imagen antes de crear el proyecto.');
+      return;
+    }
+  
+    const token = localStorage.getItem('ACCESS_TOKEN');
+    console.log(token);
+    const tokenDec = jwtDecode(token);
+    console.log(tokenDec);
+    const mail = tokenDec.unique_name;
+    console.log(mail);
+    const imgRef = ref(ImageDB, `files/${mail}-${projectTitle}-${fileName}`);
+    console.log(imgRef);
+  
+    try {
+      await uploadBytes(imgRef, file);
+      console.log('Uploaded a blob or file!');
+      
+      const downloadURL = await getDownloadURL(imgRef);
+      console.log('File available at', downloadURL);
+      
+      postProject(downloadURL);
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
+  };
+
   const startIndex = (currentPage - 1) * PAGE_SIZE;
 
-  const filteredProjects = projects.filter((project) =>
-    project.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    project.tags.some(tag => tag.toLowerCase().includes(tagSearchTerm.toLowerCase()))
+  const filteredProjects = transformed.filter(
+    (project) =>
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      project.tags.some((tag) => tag.toLowerCase().includes(tagSearchTerm.toLowerCase()))
   );
-  const currentProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
 
-  const renderTags = (tags) => {
-    if (!tags || tags.length === 0) {
-      return null; // Si no hay tags, no renderizamos nada
-    }
+  const paginatedProjects = filteredProjects.slice(startIndex, startIndex + PAGE_SIZE);
 
-    return tags.map((tag, index) => (
-      <Button key={index} disabled shape="round" style={{ margin: '5px' }}>
-        {tag}
-      </Button>
-    ));
-  };
-
-  const handleTagSearchChange = (event) => {
-    setTagSearchTerm(event.target.value);
-  };
-
-  
   return (
-    <div>
-      <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-        <Row justify="center" gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={6} style={{ textAlign: 'center' }}>
-            <Button
-              type="primary"
-              style={{ width: '80px', height: '40px' }}
-              icon={<SearchOutlined style={{ fontSize: '30px' }} />}
-              iconPosition={position}
-              shape="round"
-              onClick={Buscador}
-            >
-              Buscar
+    <>
+      <div>
+        <Row gutter={16} justify="space-between">
+          <Col span={8}>
+            <Input
+              placeholder="Buscar por título"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              prefix={<SearchOutlined />}
+            />
+          </Col>
+          <Col span={8}>
+            <Input
+              placeholder="Buscar por tag"
+              value={tagSearchTerm}
+              onChange={(e) => setTagSearchTerm(e.target.value)}
+              prefix={<SearchOutlined />}
+            />
+          </Col>
+          <Col span={8} style={{ textAlign: 'right' }}>
+            <Button type="primary" onClick={showModal}>
+              <FileAddOutlined /> Crear Proyecto
             </Button>
           </Col>
-          
         </Row>
-      </div>
-      <Row justify="center" style={{ marginTop: '20px' }}>
-        <Col span={24} style={{ textAlign: 'center' }}>
-          <Button
-            shape="round"
-            type="primary"
-            icon={<FileAddOutlined />}
-            iconPosition={position}
-            onClick={showModal}
-            style={{ width: '300px', height: '40px', fontSize: '18px' }}
-          >
-            Crear un Nuevo Proyecto
-          </Button>
-        </Col>
-      </Row>
-      <Modal
-        style={{ marginTop: '200px' }}
-        visible={isModalVisible}
-        footer={null}
-        onCancel={handleCancel}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-          }}
-        >
-          <Input
-            shape="round"
-            placeholder="Nombre del Proyecto"
-            style={{
-              marginBottom: '5px',
-              width: '300px',
-              borderRadius: '25px',
-              height: '40px',
-            }}
-            value={projectTitle}
-            onChange={handleTitleChange} // Update projectTitle state on change
-          />
-          <Button
-            shape="round"
-            type="primary"
-            icon={<FileImageOutlined />}
-            iconPosition={position}
-            onClick={handleButtonClick}
-            style={{ width: '300px', height: '40px', fontSize: '18px' }}
-          >
-            Imagen de previsualización
-          </Button>
-          {fileName && (
-            <p style={{ marginTop: '10px' }}>Nombre del archivo: {fileName}</p>
-          )}
-          <Button
-            shape="round"
-            type="primary"
-            icon={<FileAddOutlined />}
-            iconPosition={position}
-            onClick={handleCreateProject}
-            style={{
-              width: '250px',
-              height: '40px',
-              fontSize: '18px',
-              marginTop: '20px',
-            }}
-          >
-            Crear Proyecto
-          </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            accept="image/*"
-            onChange={handleImageUpload}
-          />
-        </div>
-      </Modal>
-      <Modal
-        style={{ marginTop: '200px' }}
-        visible={isModalVisible2}
-        footer={null}
-        onCancel={handleCancel2}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-          }}
-        >
-          <Input
-            placeholder="Buscar por nombre del proyecto"
-            style={{ marginBottom: '10px', width: '80%' }}
-            onChange={handleSearchChange}
-          />
-          <Input
-            placeholder="Buscar por categoría del proyecto"
-            style={{ marginBottom: '10px', width: '80%' }}
-            onChange={handleTagSearchChange}
-          />
-          <Button
-            shape="round"
-            type="primary"
-            icon={<SearchOutlined />}
-            iconPosition={position}
-            onClick={handleCancel2}
-            style={{ width: '300px', height: '40px', fontSize: '18px' }}
-          >
-            Buscar
-          </Button>
-        </div>
-      </Modal>
-      <Row
-        justify="center"
-        gutter={[16, 16]}
-        style={{ marginTop: '20px', marginBottom: '20px' }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            opacity: transitioning ? 0 : 1,
-            transition: 'opacity 0.3s ease-in-out',
-            width: '100%',
-            justifyContent: 'center',
-          }}
-        >
-          {currentProjects.map((project) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={project.id}>
+        <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
+          {paginatedProjects.map((project) => (
+            <Col key={project.id} span={6}>
               <Card
-                onClick={() => navigate(`/Proyectos/${project.id}/Proyecto`)}
                 hoverable
-                style={{ marginBottom: '30px' }} // Add margin bottom to increase vertical spacing
-                cover={
-                  <img
-                    alt={project.title}
-                    src={project.image}
-                    style={{
-                      backgroundColor: '#f5f5f5',
-                      height: '200px',
-                      objectFit: 'cover',
-                      width: '100%',
-                    }}
-                  />
-                }
+                cover={<img alt={project.title} src={project.image} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />}
+                onClick={() => navigate(`/detallesproyectos/${project.id}`)} // Add onClick handler to navigate to project details
               >
+                <Card.Meta title={project.title} />
                 <div style={{ marginTop: '10px' }}>
-                  {renderTags(project.tags)}
+                  {project.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        display: 'inline-block',
+                        marginRight: '5px',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        backgroundColor: '#f0f0f0',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-                <Card.Meta
-                  title={
-                    <div style={{ fontSize: '120%', marginTop: '10px' }}>
-                      {project.title}
-                    </div>
-                  }
-                />
               </Card>
             </Col>
           ))}
-        </div>
-      </Row>
-      <Row justify="center" style={{ marginTop: '20px' }}>
-        <Pagination
-          current={currentPage}
-          pageSize={PAGE_SIZE}
-          total={projects.length}
-          onChange={handlePageChange}
+        </Row>
+        <Row justify="center" style={{ marginTop: '20px' }}>
+          <Pagination
+            current={currentPage}
+            pageSize={PAGE_SIZE}
+            total={filteredProjects.length}
+            onChange={handlePageChange}
+          />
+        </Row>
+      </div>
+
+      <Modal
+        title="Crear Proyecto"
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="cancel" onClick={handleCancel}>
+            Cancelar
+          </Button>,
+          <Button key="create" type="primary" onClick={handleCreateProject}>
+            Crear
+          </Button>,
+        ]}
+      >
+        <Input
+          placeholder="Título del proyecto"
+          value={projectTitle}
+          onChange={handleTitleChange}
         />
-      </Row>
-    </div>
+        <Button
+          onClick={handleButtonClick}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            marginTop: '20px',
+          }}
+        >
+          <FileImageOutlined /> Subir Imagen
+        </Button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
+        {fileName && (
+          <p style={{ marginTop: '10px' }}>Archivo seleccionado: {fileName}</p>
+        )}
+        {errorMessage && (
+          <p style={{ marginTop: '10px', color: 'red' }}>{errorMessage}</p>
+        )}
+      </Modal>
+    </>
   );
 };
 

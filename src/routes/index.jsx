@@ -17,7 +17,7 @@ import ProyectosPublicos from '../pages/Proyectopublico';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { userAuthenticated } from '../app/authenticationSlice';
-
+import ImageGallery from '../pages/TesterImagenes';
 
 
 import Admin from '../pages/Admin';
@@ -108,6 +108,11 @@ const routes = [
     path: '/Proyectospublicos',
     layout: MainLayoutTop,
     element: ProyectosPublicos,
+  },
+  {
+    path: '/TestImg',
+    layout: MainLayoutTop,
+    element: ImageGallery,
   },
   
 

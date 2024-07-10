@@ -5,20 +5,33 @@ export const newProyectoError = createAction('newExpenseError');
 export const editExpenseError = createAction('editExpenseError');
 export const deleteExpenseError = createAction('deleteExpenseError');
 
+
+
 export const expensesSlice = createSlice({
-    name: 'expenses',
+    name: 'proyectos',
     initialState: {
-        expenses: [],
+        proyectosArray: [],
     },
     reducers: {
-        setExpenses: (state, action) => {
-            return { ...state, expenses: [...action.payload] };
-        },
         newProyecto: (state, action) => {
             const { titulo, foto, ...rest } = action.payload;
             const newExpense = { titulo, foto, ...rest };
             return { ...state, expenses: [newExpense, ...state.expenses] };
           },
+
+          setProyectoUsuario: (state, action) => {
+            console.log("set");
+            console.log('Payload:', action.payload);
+            const updatedProyectosArray = action.payload;
+            console.log('Updated proyectosArray:', updatedProyectosArray);
+            return {
+                ...state,
+                proyectosArray: updatedProyectosArray,
+            };
+        },
+
+
+
           
         editExpense: (state, action) => {
             const expenses = state.expenses.map(expense => {
@@ -37,6 +50,6 @@ export const expensesSlice = createSlice({
     }
 });
 
-export const { setExpenses, newProyecto, editExpense, deleteExpense } = expensesSlice.actions;
+export const {newProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
 
 export default expensesSlice.reducer;
