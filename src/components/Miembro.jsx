@@ -1,47 +1,53 @@
 import React, { useState } from 'react';
 import { Avatar, Row, Col, Modal, Input, Button, Space } from 'antd';
-import { UserAddOutlined, UserOutlined, CloseOutlined } from '@ant-design/icons';
+import { UserAddOutlined, CloseOutlined } from '@ant-design/icons';
 
-const UserCard = ({ member, onInviteClick, onRemoveClick }) => (
-  <Col style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-    <div style={{ textAlign: 'center', margin: '15px', position: 'relative' }}>
-      {member.isInvite ? (
-        <Avatar
-          className="w-full h-full p-10"
-          icon={<UserAddOutlined style={{ fontSize: '100px', color: '#b22222' }} />}
-          style={{ backgroundColor: '#f0f0f0', cursor: 'pointer' }}
-          onClick={onInviteClick}
-        />
-      ) : (
-        <Avatar
-          className="w-full h-full p-10"
-          style={{ backgroundColor: '#d9d9d9' }}
-          icon={<UserOutlined style={{ fontSize: '100px' }} />}
-        />
-      )}
-      <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
-        {member.name}
-        {!member.isInvite && (
-          <Space style={{ position: 'absolute', top: 0, right: 0 }}>
-            <CloseOutlined
-              style={{ fontSize: '18px', color: 'red', cursor: 'pointer' }}
-              onClick={() => onRemoveClick(member.id)}
-            />
-          </Space>
+const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
+  const initials = `${member.nombre.charAt(0)}${member.apellido.charAt(0)}`;
+
+  return (
+    <Col style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ textAlign: 'center', margin: '15px', position: 'relative' }}>
+        {member.isInvite ? (
+          <Avatar
+            className="w-full h-full p-10"
+            icon={<UserAddOutlined style={{ fontSize: '100px', color: '#b22222' }} />}
+            style={{ backgroundColor: '#f0f0f0', cursor: 'pointer' }}
+            onClick={onInviteClick}
+          />
+        ) : (
+          <Avatar
+            className="w-full h-full p-10"
+            style={{ backgroundColor: '#d9d9d9', fontSize: '100px' }}
+          >
+            {initials}
+          </Avatar>
         )}
+        <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
+          {member.nombre} {member.apellido}
+          {!member.isInvite && (
+            <Space style={{ position: 'absolute', top: 0, right: 0 }}>
+              <CloseOutlined
+                style={{ fontSize: '18px', color: 'red', cursor: 'pointer' }}
+                onClick={() => onRemoveClick(member.id)}
+              />
+            </Space>
+          )}
+        </div>
       </div>
-    </div>
-  </Col>
-);
+    </Col>
+  );
+};
 
 const Miembros = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [members, setMembers] = useState([
-    { id: 1, name: 'Nombre usuario 1', isInvite: false },
-    { id: 2, name: 'Nombre usuario 2', isInvite: false },
-    
-    
+    { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
+    { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
   ]); // Ejemplo de lista de miembros inicial
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [email, setEmail] = useState('');
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -52,12 +58,12 @@ const Miembros = () => {
   };
 
   const handleOk = () => {
-    // Lógica para agregar un nuevo miembro
+    addMember(nombre, apellido, email);
     setIsModalVisible(false);
   };
 
-  const addMember = (name) => {
-    const newMember = { id: members.length + 1, name, isInvite: false };
+  const addMember = (nombre, apellido, email) => {
+    const newMember = { id: members.length + 1, nombre, apellido, email, isInvite: false };
     setMembers([...members, newMember]);
   };
 
@@ -78,7 +84,7 @@ const Miembros = () => {
           />
         ))}
         <UserCard
-          member={{ id: 'invite', name: 'Invitar Usuario', isInvite: true }}
+          member={{ id: 'invite', nombre: 'Invitar', apellido: 'Usuario', isInvite: true }}
           onInviteClick={showModal}
         />
       </Row>
@@ -90,7 +96,21 @@ const Miembros = () => {
         footer={null}
       >
         <Input
-          placeholder="Correo de invitación"
+          placeholder="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          style={{ marginBottom: '10px' }}
+        />
+        <Input
+          placeholder="Apellido"
+          value={apellido}
+          onChange={(e) => setApellido(e.target.value)}
+          style={{ marginBottom: '10px' }}
+        />
+        <Input
+          placeholder="Correo Electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           style={{ marginBottom: '10px' }}
         />
         <Button
@@ -99,7 +119,7 @@ const Miembros = () => {
           style={{ marginBottom: '10px' }}
           onClick={handleOk}
         >
-          Enviar Invitación
+          Agregar Miembro
         </Button>
         <Button block>Copiar Link de Invitación</Button>
       </Modal>

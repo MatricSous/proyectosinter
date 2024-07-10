@@ -12,7 +12,6 @@ import Referencia from '../components/Referencia';
 
 const { Title } = Typography;
 
-const placeholderUserImage = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 const placeholderFileImage = 'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png';
 const placeholderProyectImage = 'https://static.dezeen.com/uploads/2022/07/sq-university-of-oregon-schoolshows_dezeen_2364_col_0.jpg';
 
@@ -25,24 +24,11 @@ const Proyecto = () => {
   ];
 
   const [members, setMembers] = useState([
-    { id: 1, name: 'Nombre usuario 1', isInvite: false },
-    { id: 2, name: 'Nombre usuario 2', isInvite: false },
+    { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
+    { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
   ]);
 
-  const miembros = members.map(member => member.name);
-
-  const handleModalMiembro1 = () => {
-    console.log('Mostrar modal para agregar miembro');
-  };
-
-  const renderMiembro1 = (miembro, index) => (
-    <div key={index} className="flex flex-col items-center">
-      <Avatar size={64} className="bg-gray-300" src={placeholderUserImage} />
-      <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>{miembro}</p>
-    </div>
-  );
-
-  const [referentes, setreferentes] = useState([
+  const [referentes, setReferentes] = useState([
     { id: 1, name: 'Referencia 1', isInvite: false, image: image },
     { id: 2, name: 'Referencia 2', isInvite: false, image: image },
   ]);
@@ -76,12 +62,19 @@ const Proyecto = () => {
     </div>
   );
 
-  const renderMiembro = (miembro, index) => (
-    <div key={index} className="flex flex-col items-center ">
-      <Avatar size={64} className="bg-gray-300" src={placeholderUserImage} />
-      <p>{miembro}</p>
-    </div>
-  );
+  const renderMiembro = (miembro, index) => {
+    const initials = `${miembro.nombre.charAt(0)}${miembro.apellido.charAt(0)}`;
+    return (
+      <div key={index} className="flex flex-col items-center">
+        <Avatar size={64} className="bg-gray-300">
+          {initials}
+        </Avatar>
+        <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
+          {miembro.nombre} {miembro.apellido}
+        </p>
+      </div>
+    );
+  };
 
   const renderReferente = (referente, index) => (
     <Link to="/referencia" key={index}>
@@ -190,7 +183,7 @@ const Proyecto = () => {
     // Aquí deberías añadir la lógica para eliminar el proyecto
   };
 
-  const autoridad = 2; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
+  const autoridad = 1; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
 
   return (
     <>
@@ -314,7 +307,7 @@ const Proyecto = () => {
                   <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalMiembro} />
                 )}
               </Title>
-              <ScrollableContainer items={miembros} renderItem={renderMiembro1} maxVisibleItems={5} />
+              <ScrollableContainer items={members} renderItem={renderMiembro} maxVisibleItems={5} />
             </div>
             <Title level={4} className="mt-8 text-center lg:text-left">
               Referentes
