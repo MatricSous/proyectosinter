@@ -142,6 +142,7 @@ const Miembros = () => {
         onOk={handleCreateReference}
         onCancel={handleCancel}
         footer={null}
+        width={800} // Ajusta el ancho del modal aquí
       >
         <div
           style={{
@@ -159,7 +160,7 @@ const Miembros = () => {
             onChange={(e) => setNombreReferencia(e.target.value)}
             style={{
               marginBottom: '10px',
-              width: '300px',
+              width: '100%', // Ajusta el ancho del input
               borderRadius: '25px',
               height: '40px',
             }}
@@ -170,7 +171,7 @@ const Miembros = () => {
             onChange={(e) => setDescripcionReferencia(e.target.value)}
             style={{
               marginBottom: '10px',
-              width: '300px',
+              width: '100%', // Ajusta el ancho del textarea
               borderRadius: '25px',
               height: '120px', // Tres veces la altura del nombre
             }}
@@ -181,7 +182,7 @@ const Miembros = () => {
             icon={<FileImageOutlined />}
             iconPosition={position}
             onClick={handleButtonClick}
-            style={{ width: '300px', height: '40px', fontSize: '18px' }}
+            style={{ width: '100%', height: '40px', fontSize: '18px' }} // Ajusta el ancho del botón
           >
             Imagen de previsualización
           </Button>
@@ -192,7 +193,7 @@ const Miembros = () => {
             iconPosition={position}
             onClick={handleCreateReference}
             style={{
-              width: '250px',
+              width: '100%', // Ajusta el ancho del botón
               height: '40px',
               fontSize: '18px',
               marginTop: '20px',

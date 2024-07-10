@@ -45,8 +45,6 @@ const Miembros = () => {
     { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
     { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
   ]); // Ejemplo de lista de miembros inicial
-  const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
 
   const showModal = () => {
@@ -58,12 +56,12 @@ const Miembros = () => {
   };
 
   const handleOk = () => {
-    addMember(nombre, apellido, email);
+    addMember(email);
     setIsModalVisible(false);
   };
 
-  const addMember = (nombre, apellido, email) => {
-    const newMember = { id: members.length + 1, nombre, apellido, email, isInvite: false };
+  const addMember = (email) => {
+    const newMember = { id: members.length + 1, nombre: 'Invitado', apellido: '', email, isInvite: false };
     setMembers([...members, newMember]);
   };
 
@@ -94,19 +92,8 @@ const Miembros = () => {
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
+        width={800} // Ajusta el ancho del modal aquí
       >
-        <Input
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          style={{ marginBottom: '10px' }}
-        />
-        <Input
-          placeholder="Apellido"
-          value={apellido}
-          onChange={(e) => setApellido(e.target.value)}
-          style={{ marginBottom: '10px' }}
-        />
         <Input
           placeholder="Correo Electrónico"
           value={email}
@@ -121,7 +108,6 @@ const Miembros = () => {
         >
           Agregar Miembro
         </Button>
-        <Button block>Copiar Link de Invitación</Button>
       </Modal>
     </div>
   );
