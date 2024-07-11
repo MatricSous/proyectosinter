@@ -3,20 +3,56 @@ import { SearchOutlined, FileAddOutlined, FileImageOutlined } from '@ant-design/
 import React, { useState, useEffect, useRef } from 'react';
 import project1Image from '../images/test.jpg';
 import project1Image2 from '../images/image-1@2x.png';
-import { useSelector , useDispatch} from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, Navigate } from 'react-router-dom'; // Import Navigate
-import { GetProyectos } from '../services/proyectos';
 
 
+const getRandomTags = () => {
+  const tags = ['Arquitectura', 'Infraestructura', 'Educación', 'Tecnología', 'Salud'];
+  const randomTags = [];
+  const numberOfTags = Math.floor(Math.random() * 3) + 1; // Número aleatorio de tags entre 1 y 3
 
+  for (let i = 0; i < numberOfTags; i++) {
+    const randomIndex = Math.floor(Math.random() * tags.length);
+    randomTags.push(`#${tags[randomIndex]}`);
+  }
+
+  return [...new Set(randomTags)]; // Eliminar tags duplicados
+};
+
+const projects = [
+  { id: 1, title: 'Universidad', image: project1Image, tags: getRandomTags() },
+  { id: 2, title: 'Shun Jie', image: project1Image, tags: getRandomTags() },
+  { id: 3, title: 'Shun Jia', image: project1Image, tags: getRandomTags() },
+  { id: 4, title: 'Proyecto Shun', image: project1Image, tags: getRandomTags() },
+  { id: 5, title: 'Proyecto 5', image: project1Image , tags: getRandomTags()},
+  { id: 6, title: 'Proyecto 6', image: project1Image , tags: getRandomTags()},
+  { id: 7, title: 'Proyecto 7', image: project1Image , tags: getRandomTags()},
+  { id: 8, title: 'Proyecto 8', image: project1Image , tags: getRandomTags()},
+  { id: 9, title: 'Proyecto 9', image: project1Image , tags: getRandomTags()},
+  { id: 10, title: 'Proyecto 10', image: project1Image , tags: getRandomTags()},
+  { id: 11, title: 'Proyecto 11', image: project1Image , tags: getRandomTags()},
+  { id: 12, title: 'Proyecto 12', image: project1Image , tags: getRandomTags()},
+  { id: 13, title: 'Proyecto 13', image: project1Image , tags: getRandomTags()},
+  { id: 14, title: 'Proyecto 14', image: project1Image , tags: getRandomTags()},
+  { id: 15, title: 'Proyecto 15', image: project1Image , tags: getRandomTags()},
+  { id: 16, title: 'Proyecto 16', image: project1Image , tags: getRandomTags()},
+  { id: 17, title: 'Proyecto 17', image: project1Image , tags: getRandomTags()},
+  { id: 18, title: 'Proyecto 18', image: project1Image , tags: getRandomTags()},
+  { id: 19, title: 'Proyecto 19', image: project1Image , tags: getRandomTags()},
+  { id: 20, title: 'Proyecto 20', image: project1Image , tags: getRandomTags()},
+  { id: 21, title: 'Proyecto 21', image: project1Image , tags: getRandomTags()},
+  { id: 22, title: 'Proyecto 22', image: project1Image , tags: getRandomTags()},
+  { id: 23, title: 'Proyecto 23', image: project1Image , tags: getRandomTags()},
+  { id: 24, title: 'Proyecto 24', image: project1Image , tags: getRandomTags()},
+  { id: 25, title: 'Proyecto 25', image: project1Image , tags: getRandomTags()},
+  { id: 26, title: 'Proyecto 26', image: project1Image , tags: getRandomTags()},
+  { id: 27, title: 'Proyecto 27', image: project1Image , tags: getRandomTags()},
+];
 
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
-
-  const [transformed, setTransformed] = useState([]);
-  const dispatch = useDispatch();
-  const proyectos = useSelector(state => state.expensesSlice.proyectosArray); // Corrected state path
   
   const {isLoggedIn} = useSelector(state => state.authenticationSlice);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,26 +63,6 @@ const Proyectos = () => {
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
   const [tagSearchTerm, setTagSearchTerm] = useState(''); // Estado para la búsqueda por tag
-
-  useEffect(() => {
-    const fetchProyectos = async () => {
-      await GetProyectos(dispatch);
-    };
-    fetchProyectos();
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (proyectos.length > 0) {
-      const transformedData = proyectos.map(project => ({
-        id: project.proyecto.id,
-        title: project.proyecto.titulo,
-        image: project.proyecto.foto,
-        tags: project.tagsProyecto.map(tag => tag.texto)
-      }));
-      setTransformed(transformedData);
-      console.log("transformed", transformedData);
-    }
-  }, [proyectos]);
 
   useEffect(() => {
     if (transitioning) {
@@ -119,7 +135,7 @@ const Proyectos = () => {
     setTagSearchTerm(event.target.value);
   };
 
-  const filteredProjects = transformed.filter((project) =>
+  const filteredProjects = projects.filter((project) =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
     project.tags.some(tag => tag.toLowerCase().includes(tagSearchTerm.toLowerCase()))
   );
@@ -239,7 +255,7 @@ const Proyectos = () => {
         <Pagination
           current={currentPage}
           pageSize={PAGE_SIZE}
-          total={transformed.length}
+          total={projects.length}
           onChange={handlePageChange}
         />
       </Row>

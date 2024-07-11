@@ -15,7 +15,6 @@ const placeholderFileImage = 'https://www.iconpacks.net/icons/2/free-file-icon-1
 const placeholderProyectImage = 'https://static.dezeen.com/uploads/2022/07/sq-university-of-oregon-schoolshows_dezeen_2364_col_0.jpg';
 
 const Proyecto = () => {
-  
   const archivos = [
     { name: 'Archivo 1', fileSize: '2 MB' },
     { name: 'Archivo 2', fileSize: '1.5 MB' },
