@@ -1,5 +1,5 @@
 import {
-    setExpenses, setProyectoUsuario, newProyecto, editExpense, deleteExpense,
+    setExpenses, setProyectoUsuario, setDetallesProyecto, newComentario, newProyecto, editExpense, deleteExpense,
     setExpensesError, editExpenseError, newProyectoError, deleteExpenseError
 } from '../app/expenseSlice';
 import axios from 'axios';
@@ -47,11 +47,22 @@ export const crearProyecto = async (dispatch, proyecto) => {
     }
 }
 
-export const GetDetallesProyecto = async (dispatch) => {
+export const comentar = async (dispatch, comentario) => {
     try {
         // api call
-        const { data } = await axiosInstance.get('/ProyectosUsuario');
-        dispatch(setProyectoUsuario(data));
+        console.log(comentario)
+        const { data } = await axiosInstance.post('/comentar', comentario);
+        dispatch(newComentario(data));
+    } catch {
+        dispatch(newProyectoError());
+    }
+}
+
+export const GetDetallesProyecto = async (dispatch, id) => {
+    try {
+        // api call
+        const { data } = await axiosInstance.post('/datosProyecto', id );
+        dispatch(setDetallesProyecto(data));
         console.log(data)
     } catch {
         dispatch(setExpensesError());

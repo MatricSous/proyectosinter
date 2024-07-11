@@ -32,14 +32,21 @@ export const expensesSlice = createSlice({
 
             
         },
+
+        newComentario: (state, action) => {
+            console.log(action.payload)
+            const { idProyecto, contenido, ...rest } = action.payload;
+            const newExpense = { idProyecto, contenido, ...rest };
+            return { ...state, expenses: [newExpense, ...state.expenses] };
+        },
         setDetallesProyecto: (state, action) => {
             console.log("set Detalles");
             console.log('Payload:', action.payload);
-            const updatedProyectosArray = action.payload;
-            console.log('Updated proyectosArray:', updatedProyectosArray);
+            const updatedDetallesProyecto = action.payload;
+            console.log('Updated detallesProyecto:', updatedDetallesProyecto);
             return {
                 ...state,
-                detallesProyecto: updatedProyectosArray,
+                detallesProyecto: updatedDetallesProyecto,
             };
 
             
@@ -65,6 +72,6 @@ export const expensesSlice = createSlice({
     }
 });
 
-export const {newProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
+export const {newProyecto, newComentario, setDetallesProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
 
 export default expensesSlice.reducer;

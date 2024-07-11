@@ -1,4 +1,5 @@
-import { userAuthenticated } from '../app/authenticationSlice';
+import { userAuthenticated, logout } from '../app/authenticationSlice';
+
 import axios from 'axios';
 
 const axiosInstance = axios.create({
@@ -23,4 +24,16 @@ export const SignIn = async (dispatch, credentials) => {
     } catch (error) {
         console.error('Error!', error);
     }
+
+
+}
+
+export const LogOut = async(dispatch, credentials) => {
+    try {
+        dispatch(logout())
+    }
+    catch(error){
+        console.error('Error!', error);
+    }
+    
 }
