@@ -1,14 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Avatar, Card, Modal, Tag, Typography, Input, Button, Col, Popconfirm, message } from 'antd';
 import ScrollableContainer from '../components/ScrollableList';
 import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
 import UploadFile from '../components/UploadFile';
 import Miembro from '../components/Miembro';
-import { Link } from 'react-router-dom';
-import image from '../images/test2.jpg';
 import Foro from '../components/Foro';
 import Referencia from '../components/Referencia';
+import image from '../images/test2.jpg'; // Asegúrate de que la ruta de la imagen sea correcta
 
 const { Title } = Typography;
 
@@ -22,11 +21,16 @@ const Proyecto = () => {
     { name: 'Archivo 2', fileSize: '1.5 MB' },
     { name: 'Archivo 3', fileSize: '3.2 MB' },
     { name: 'Archivo 4', fileSize: '700 KB' },
+    { name: 'Archivo 5', fileSize: '1.2 MB' },
+    { name: 'Archivo 6', fileSize: '2.4 MB' },
+    { name: 'Archivo 7', fileSize: '3.1 MB' },
   ];
 
   const [members, setMembers] = useState([
     { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
     { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
+    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
   ]);
 
   const [referentes, setReferentes] = useState([
@@ -35,6 +39,31 @@ const Proyecto = () => {
   ]);
 
   const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
+
+  const [description, setDescription] = useState('Descripción: Hola');
+  const [newDescription, setNewDescription] = useState('');
+  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
+
+  const showDescriptionModal = () => {
+    setNewDescription(description);
+    setIsDescriptionModalVisible(true);
+  };
+
+  const handleDescriptionOk = () => {
+    setIsDescriptionModalVisible(false);
+    Modal.confirm({
+      title: 'Confirmar cambio',
+      content: '¿Estás seguro de cambiar la descripción?',
+      onOk: () => {
+        setDescription(newDescription);
+        message.success('Descripción actualizada');
+      },
+    });
+  };
+
+  const handleDescriptionCancel = () => {
+    setIsDescriptionModalVisible(false);
+  };
 
   const renderArchivo = (archivo, index) => (
     <div
@@ -233,7 +262,12 @@ const Proyecto = () => {
         </div>
       </Modal>
 
-      <Modal visible={isModalVisible2} onCancel={handleModal2} width={'25%'} footer={null}>
+      <Modal
+        visible={isModalVisible2}
+        onCancel={handleModal2}
+        width={'25%'}
+        footer={null}
+      >
         <div
           style={{
             display: 'flex',
@@ -256,12 +290,32 @@ const Proyecto = () => {
           <Button
             type="primary"
             shape="round"
-            style={{ width: '200px', height: '40px', fontSize: '18px', marginTop: '20px' }}
+            style={{
+              width: '200px',
+              height: '40px',
+              fontSize: '18px',
+              marginTop: '20px',
+            }}
             onClick={handleModal2}
           >
             Aceptar<LikeOutlined />
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        visible={isDescriptionModalVisible}
+        onCancel={handleDescriptionCancel}
+        onOk={handleDescriptionOk}
+        width={'50%'}
+      >
+        <Title level={4}>Descripción</Title>
+        <Input.TextArea
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          rows={4}
+          placeholder="Edita la descripción del proyecto..."
+        />
       </Modal>
 
       <div className="p-8">
@@ -274,21 +328,35 @@ const Proyecto = () => {
               )}
             </Title>
             <p className="text-center lg:text-left">16/06/2024</p>
-            <Title level={4} className="mb-2 text-center lg:text-left">
-              Imagen Opcional
-              {autoridad <= 3 && (
-                <EditOutlined className="ml-2" size={20} onClick={handleModal3} />
-              )}
-            </Title>
-            <div className="w-full lg:w-[500px] h-[500px]">
+            <div className="w-full lg:w-[500px] h-[500px]" style={{ position: 'relative' }}>
               <img src={projectImage} alt="Imagen del proyecto" className="w-full h-full bg-gray-300 rounded-lg" />
-              <ScrollableContainer items={tags} renderItem={renderTag} maxVisibleItems={5} />
-              <div>
-                <Title level={4} className="mb-2 text-center lg:text-left">
-                  Comentarios
-                  <MessageOutlined className="ml-2" size={20} onClick={handleModal4} />
-                </Title>
-              </div>
+              {autoridad <= 3 && (
+                <EditOutlined
+                  className="absolute top-0 right-0 m-2 text-white bg-black rounded-full p-1"
+                  size={20}
+                  onClick={handleModal3}
+                />
+              )}
+            </div>
+            <ScrollableContainer items={tags} renderItem={renderTag} maxVisibleItems={5} />
+            <div style={{ marginTop: '20px', marginBottom: '20px', width: '100%', position: 'relative' }}>
+              <Title level={3} className="mb-2 text-center lg:text-left">
+                Descripción
+                {autoridad <= 3 && (
+                  <EditOutlined
+                    className="ml-2 cursor-pointer"
+                    onClick={showDescriptionModal}
+                    style={{ color: 'rgba(0, 0, 0, 0.45)' }}
+                  />
+                )}
+              </Title>
+              <p style={{ marginBottom: '10px' }}>{description}</p>
+            </div>
+            <div>
+              <Title level={4} className="mb-2 text-center lg:text-left">
+                Comentarios
+                <MessageOutlined className="ml-2" size={20} onClick={handleModal4} />
+              </Title>
             </div>
           </div>
           <div className="flex flex-col items-start w-full lg:w-auto">
@@ -300,7 +368,16 @@ const Proyecto = () => {
                 )}
               </Title>
             </div>
-            <div className="w-full">{archivos.map((archivo, index) => renderArchivo(archivo, index))}</div>
+            <div className="w-full h-64 overflow-y-auto">
+              {archivos.map((archivo, index) => renderArchivo(archivo, index))}
+              {[...Array(Math.max(0, 6 - archivos.length)).keys()].map((_, index) => (
+                <div
+                  key={`placeholder-${index}`}
+                  className="flex items-center bg-transparent p-2 mb-2 rounded-lg"
+                  style={{ height: '50px' }}
+                />
+              ))}
+            </div>
             <div>
               <Title level={4} className="mt-8 text-center lg:text-left">
                 Miembros
@@ -308,7 +385,7 @@ const Proyecto = () => {
                   <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalMiembro} />
                 )}
               </Title>
-              <ScrollableContainer items={members} renderItem={renderMiembro} maxVisibleItems={5} />
+              <ScrollableContainer items={members} renderItem={renderMiembro} maxVisibleItems={3} isHorizontal={true} />
             </div>
             <Title level={4} className="mt-8 text-center lg:text-left">
               Referentes
@@ -316,7 +393,7 @@ const Proyecto = () => {
                 <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalReferencia} />
               )}
             </Title>
-            <ScrollableContainer items={referentes} renderItem={renderReferente2} maxVisibleItems={3} />
+            <ScrollableContainer items={referentes} renderItem={renderReferente2} maxVisibleItems={3} isHorizontal={true} />
             {(autoridad === 1 || autoridad === 2) && (
               <Title level={4} className="mt-8 text-center lg:text-left">
                 Eliminar Proyecto
