@@ -72,18 +72,18 @@ const routes = [
   },
   {
     path: '/Perfil',
-    layout: MainLayoutTop,
-    element: Perfil,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Proyectos/:id/Proyectopublico',
     layout: MainLayoutTop,
-    element: ProyectoPublico,
+    element: Login,
   },
   {
     path: '/Proyectospublicos',
     layout: MainLayoutTop,
-    element: ProyectosPublicos,
+    element: Login,
   },
 
 

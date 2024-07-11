@@ -1,8 +1,6 @@
 import { Card, Button, Row, Col, Pagination, Modal, Input } from 'antd';
 import { SearchOutlined, FileAddOutlined, FileImageOutlined } from '@ant-design/icons';
 import React, { useState, useEffect, useRef } from 'react';
-import project1Image from '../images/test.jpg';
-import project1Image2 from '../images/image-1@2x.png';
 import { useSelector , useDispatch} from 'react-redux';
 import { useNavigate, Navigate } from 'react-router-dom'; // Import Navigate
 import { GetProyectos } from '../services/proyectos';
@@ -13,12 +11,11 @@ import { GetProyectos } from '../services/proyectos';
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
-
   const [transformed, setTransformed] = useState([]);
   const dispatch = useDispatch();
   const proyectos = useSelector(state => state.expensesSlice.proyectosArray); // Corrected state path
-  
-  const {isLoggedIn} = useSelector(state => state.authenticationSlice);
+
+  const { isLoggedIn } = useSelector(state => state.authenticationSlice);
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');

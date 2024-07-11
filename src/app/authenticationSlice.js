@@ -25,8 +25,19 @@ export const authenticationSlice = createSlice({
                 }
             }
         },
-        logout: () => {
+        logout: (state, action) => {
+            console.log("logout master")
             sessionStorage.clear();
+            localStorage.clear();
+            return {
+                ...state, ...{
+                    accessToken: '',
+                    isLoggedIn: false,
+                    rol: ''
+
+
+                }
+            }
         }
     }
 });

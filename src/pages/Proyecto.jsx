@@ -8,6 +8,10 @@ import Miembro from '../components/Miembro';
 import Foro from '../components/Foro';
 import Referencia from '../components/Referencia';
 import image from '../images/test2.jpg'; // Asegúrate de que la ruta de la imagen sea correcta
+import { useDispatch , useSelector} from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { GetDetallesProyecto } from '../services/proyectos';
 
 const { Title } = Typography;
 
@@ -15,16 +19,137 @@ const placeholderFileImage = 'https://www.iconpacks.net/icons/2/free-file-icon-1
 const placeholderProyectImage = 'https://static.dezeen.com/uploads/2022/07/sq-university-of-oregon-schoolshows_dezeen_2364_col_0.jpg';
 
 const Proyecto = () => {
+
+  const dispatch = useDispatch();
+  const detallesProyecto = useSelector(state => state.expensesSlice.detallesProyecto);
+  let { id } = useParams();
+  const [autoridad, setAutoridad] = useState('');
+  const [proyectoTags, setProyectoTags] = useState({});
+  const [proyecto, setProyecto] = useState({});
+
+  const [comentarios, setComentarios] = useState([]);
+  const [referencias, setReferencias] = useState([]);
+  const [colaboradores, setColaboradores] = useState([]);
+  const [archivos, setArchivos] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [archivosT, setArchivosT] = useState([]);
+  const [miembrosT,setMiembrosT] = useState([]);
+  const [description, setDescription] = useState('Descripción: Hola');
+  const [projectTitle, setProjectTitle] = useState("Titulo del Proy.")
+  const [creacion, setCreacion] = useState("22-22-2222");
+  const [referenciasT, setReferenciasT] = useState([]);
+  const[comentariosT,setComentariosT] = useState([]);
+  const [nombreUsuario, setNombreUsuario] = useState("");
+  useEffect(() => {
+    // Function to fetch proyecto details
+    const fetchProyectoDetails = async () => {
+        const idData = { id: id };
+        await GetDetallesProyecto(dispatch,idData);
+    }; 
+    fetchProyectoDetails();// Execute the fetch on component mount or when 'dispatch' changes
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    // Update state when detallesProyecto changes
+    if (detallesProyecto) {
+      setProyectoTags(detallesProyecto.proyectoTags || {});
+      setAutoridad(detallesProyecto.autoridad || '');
+      setComentarios(detallesProyecto.comentarios || []);
+      setReferencias(detallesProyecto.referencias || []);
+      setColaboradores(detallesProyecto.colaboradores || []);
+      setArchivos(detallesProyecto.archivos || []);
+
+    }
+  }, [detallesProyecto]);
+
+  useEffect(() => {
+    // Log variables and set proyecto and tags
+    console.log("Proyecto Tags:", proyectoTags);
+    console.log("Autoridad:", autoridad);
+    console.log("Comentarios:", comentarios);
+    console.log("Referencias:", referencias);
+    console.log("Colaboradores:", colaboradores);
+    console.log("Archivos", archivos);
+
+    // Ensure proyectoTags.tagsProyecto and proyectoTags.proyecto exist and are arrays before setting state
+    if (proyectoTags && proyectoTags.tagsProyecto) {
+      setTags(proyectoTags.tagsProyecto);
+    }
+    if (proyectoTags && proyectoTags.proyecto) {
+      setProyecto(proyectoTags.proyecto);
+    }
+
+    const transformedArchivos = archivos.map(archivo => ({
+      name: archivo.nombre,
+      fileSize: archivo.contenido.replace('.', ''), // Removing the dot from file extension
+      link: archivo.ruta
+    }));
+    const transformedMiembros = colaboradores.map(archivo => ({
+      nombre: archivo.nombre,
+      apellido: archivo.apellidoPat + " "+ archivo.apellidoMat,
+      mail: archivo.mail
+    }));
+    const transformedReferentes = referencias.map(archivo => ({
+      id: archivo.id,
+      nombre: "Referencia " + id,
+      image: archivo.foto
+    }));
+    const transformedComentarios = comentarios.map(archivo => ({
+      user: archivo.nombreCompleto,
+      text: archivo.contenido
+    }));
+
+    setArchivosT(transformedArchivos)
+    setMiembrosT(transformedMiembros)
+    setReferenciasT(transformedReferentes)
+    setComentariosT(transformedComentarios)
+
+
+
+  }, [proyectoTags, autoridad, comentarios, referencias, colaboradores, archivos]);
+
+  useEffect(() => {
+    // Log variables when detallesProyecto changes
+    setProjectTitle(proyecto.titulo)
+    setProjectImage(proyecto.foto)
+    setDescription(proyecto.descripcion)
+    setCreacion(proyecto.creacion)
+
+    
+
+    console.log("Proyecto Tags:", proyectoTags);
+    console.log("Autoridad:", autoridad);
+    console.log("Comentarios:", comentarios);
+    console.log("Referencias:", referencias);
+    console.log("Colaboradores:", colaboradores);
+    console.log("Archivos", archivos);
+    console.log(proyecto)
+    console.log(tags)
+    console.log("AY", comentariosT)
   
-  const archivos = [
-    { name: 'Archivo 1', fileSize: '2 MB' },
-    { name: 'Archivo 2', fileSize: '1.5 MB' },
-    { name: 'Archivo 3', fileSize: '3.2 MB' },
-    { name: 'Archivo 4', fileSize: '700 KB' },
-    { name: 'Archivo 5', fileSize: '1.2 MB' },
-    { name: 'Archivo 6', fileSize: '2.4 MB' },
-    { name: 'Archivo 7', fileSize: '3.1 MB' },
-  ];
+    
+  }, [proyecto]);
+
+  useEffect(() => {
+    // Log variables when detallesProyecto changes
+    setCreacion(creacion.substring(0,10))
+
+    console.log("AY2",description)
+  
+    
+  }, [description]);
+
+
+
+
+  //   { name: 'Archivo 1', fileSize: 'JPG' },
+   // { name: 'Archivo 2', fileSize: '1.5 MB' },
+    //{ name: 'Archivo 3', fileSize: '3.2 MB' },
+    //{ name: 'Archivo 4', fileSize: '700 KB' },
+    //{ name: 'Archivo 5', fileSize: '1.2 MB' },
+    //{ name: 'Archivo 6', fileSize: '2.4 MB' },
+    //{ name: 'Archivo 7', fileSize: '3.1 MB' },
+  //];
 
   const [members, setMembers] = useState([
     { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
@@ -38,9 +163,9 @@ const Proyecto = () => {
     { id: 2, name: 'Referencia 2', isInvite: false, image: image },
   ]);
 
-  const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
+  //const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
 
-  const [description, setDescription] = useState('Descripción: Hola');
+
   const [newDescription, setNewDescription] = useState('');
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
 
@@ -213,7 +338,7 @@ const Proyecto = () => {
     // Aquí deberías añadir la lógica para eliminar el proyecto
   };
 
-  const autoridad = 1; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
+  //const autoridad = 1; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
 
   return (
     <>
@@ -228,7 +353,7 @@ const Proyecto = () => {
       </Modal>
 
       <Modal open={isModalVisible4} onCancel={handleModal4} width={'80%'}>
-        <Foro />
+        <Foro commentsIn = {comentariosT} proyectIdIn={proyecto.id} />
       </Modal>
 
       <Modal visible={isModalVisible3} onCancel={handleModal3} width={'40%'} footer={null}>
@@ -322,12 +447,12 @@ const Proyecto = () => {
         <div className="flex flex-col lg:flex-row justify-around mb-8">
           <div className="flex flex-col items-center lg:items-start mb-8 lg:mb-0 w-full lg:w-auto">
             <Title level={3} className="text-center lg:text-left">
-              Nombre Proyecto
+              {projectTitle}
               {autoridad <= 3 && (
                 <EditOutlined className="ml-2" size={20} onClick={handleModal2} />
               )}
             </Title>
-            <p className="text-center lg:text-left">16/06/2024</p>
+            <p className="text-center lg:text-left">{creacion}</p>
             <div className="w-full lg:w-[500px] h-[500px]" style={{ position: 'relative' }}>
               <img src={projectImage} alt="Imagen del proyecto" className="w-full h-full bg-gray-300 rounded-lg" />
               {autoridad <= 3 && (
@@ -369,7 +494,7 @@ const Proyecto = () => {
               </Title>
             </div>
             <div className="w-full h-64 overflow-y-auto">
-              {archivos.map((archivo, index) => renderArchivo(archivo, index))}
+              {archivosT.map((archivo, index) => renderArchivo(archivo, index))}
               {[...Array(Math.max(0, 6 - archivos.length)).keys()].map((_, index) => (
                 <div
                   key={`placeholder-${index}`}
@@ -385,15 +510,15 @@ const Proyecto = () => {
                   <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalMiembro} />
                 )}
               </Title>
-              <ScrollableContainer items={members} renderItem={renderMiembro} maxVisibleItems={3} isHorizontal={true} />
+              <ScrollableContainer items={miembrosT} renderItem={renderMiembro} maxVisibleItems={3} isHorizontal={true} />
             </div>
             <Title level={4} className="mt-8 text-center lg:text-left">
-              Referentes
+              Referencias
               {autoridad <= 3 && (
                 <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalReferencia} />
               )}
             </Title>
-            <ScrollableContainer items={referentes} renderItem={renderReferente2} maxVisibleItems={3} isHorizontal={true} />
+            <ScrollableContainer items={referenciasT} renderItem={renderReferente2} maxVisibleItems={3} isHorizontal={true} />
             {(autoridad === 1 || autoridad === 2) && (
               <Title level={4} className="mt-8 text-center lg:text-left">
                 Eliminar Proyecto
