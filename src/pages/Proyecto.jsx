@@ -29,10 +29,16 @@ const Proyecto = () => {
     { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
     { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
     { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
     { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
   ]);
 
   const [referentes, setReferentes] = useState([
+    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
     { id: 1, name: 'Referencia 1', isInvite: false, image: image },
     { id: 2, name: 'Referencia 2', isInvite: false, image: image },
   ]);
@@ -175,36 +181,23 @@ const Proyecto = () => {
   const navigate = useNavigate();
 
   const renderReferente2 = (referente) => (
-    <Col xs={24} sm={12} md={8} lg={6} key={referente.id}>
-      <Card
-        onClick={() => navigate(`/Proyectos/${referente.id}/Referencia`)}
-        hoverable
-        style={{ marginBottom: '30px', height: '100px' }}
-        cover={
-          <div
-            style={{
-              width: '100%',
-              height: '100px',
-              overflow: 'hidden',
-            }}
-          >
-            <img
-              alt={referente.title}
-              src={referente.image}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderBottomLeftRadius: '20px',
-                borderBottomRightRadius: '20px',
-              }}
-            />
-          </div>
-        }
-      >
-        <Card.Meta title={referente.title} />
-      </Card>
-    </Col>
+    <Card
+      key={referente.id}
+      hoverable
+      style={{ minWidth: '120px', minHeight: '120px', marginRight: '10px' }}
+      onClick={() => navigate(`/Proyectos/${referente.id}/Referencia`)}
+      cover={
+        <div style={{ width: '100%', height: '100px', overflow: 'hidden' }}>
+          <img
+            alt={referente.name}
+            src={referente.image}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </div>
+      }
+    >
+      <Card.Meta title={referente.name} />
+    </Card>
   );
 
   const confirmDeleteProject = () => {
