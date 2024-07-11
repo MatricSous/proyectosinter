@@ -16,6 +16,7 @@ import { ImageDB } from '../Config';
 const PAGE_SIZE = 8; // Number of cards per page
 
 const Proyectos = () => {
+  
   const [transformed, setTransformed] = useState([]);
   const dispatch = useDispatch();
   const proyectos = useSelector(state => state.expensesSlice.proyectosArray); // Corrected state path
@@ -27,7 +28,6 @@ const Proyectos = () => {
   const fileInputRef = useRef(null);
   const [tags, setTags] = useState([]); // State for tags
   const [tagInput, setTagInput] = useState(''); // State for tag input
-
   const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
   const [file, setFile] = useState(null); // State to store uploaded file
   const [fileName, setFileName] = useState(''); // State to store uploaded file name

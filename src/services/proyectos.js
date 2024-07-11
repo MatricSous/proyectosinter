@@ -14,6 +14,17 @@ axiosInstance.interceptors.request.use((config) => {
     return config;
 });
 
+export const GetProyectos = async (dispatch) => {
+    try {
+        // api call
+        const { data } = await axiosInstance.get('');
+        dispatch(setProyectoUsuario(data));
+        console.log(data)
+    } catch {
+        dispatch(setExpensesError());
+    }
+}
+
 
 export const GetProyectosUsuario = async (dispatch) => {
     try {
@@ -36,6 +47,16 @@ export const crearProyecto = async (dispatch, proyecto) => {
     }
 }
 
+export const GetDetallesProyecto = async (dispatch) => {
+    try {
+        // api call
+        const { data } = await axiosInstance.get('/ProyectosUsuario');
+        dispatch(setProyectoUsuario(data));
+        console.log(data)
+    } catch {
+        dispatch(setExpensesError());
+    }
+}
 export const EditExpense = async (dispatch, expense) => {
     try {
         // api call

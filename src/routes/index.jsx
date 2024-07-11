@@ -55,7 +55,7 @@ const routes = [
     element: Proyectos,
   },
   {
-    path: '/Proyectos/:id/Proyecto',
+    path: '/Proyecto/:id',
     layout: MainLayoutTop,
     element: Proyecto,
   },

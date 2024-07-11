@@ -11,13 +11,14 @@ export const expensesSlice = createSlice({
     name: 'proyectos',
     initialState: {
         proyectosArray: [],
+        detallesProyecto: []
     },
     reducers: {
         newProyecto: (state, action) => {
             const { titulo, foto, ...rest } = action.payload;
             const newExpense = { titulo, foto, ...rest };
             return { ...state, expenses: [newExpense, ...state.expenses] };
-          },
+        },
 
           setProyectoUsuario: (state, action) => {
             console.log("set");
@@ -28,6 +29,20 @@ export const expensesSlice = createSlice({
                 ...state,
                 proyectosArray: updatedProyectosArray,
             };
+
+            
+        },
+        setDetallesProyecto: (state, action) => {
+            console.log("set Detalles");
+            console.log('Payload:', action.payload);
+            const updatedProyectosArray = action.payload;
+            console.log('Updated proyectosArray:', updatedProyectosArray);
+            return {
+                ...state,
+                detallesProyecto: updatedProyectosArray,
+            };
+
+            
         },
 
 
