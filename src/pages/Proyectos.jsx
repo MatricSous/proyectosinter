@@ -7,6 +7,7 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 import project1Image from '../images/image.png';
 import { useHref, useNavigate } from 'react-router-dom';
+import { useHref, useNavigate } from 'react-router-dom';
 import { crearProyecto, GetProyectosUsuario } from '../services/proyectos';
 import { useDispatch, useSelector } from 'react-redux';
 import {jwtDecode} from 'jwt-decode';

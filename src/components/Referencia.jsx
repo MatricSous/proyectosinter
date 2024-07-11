@@ -51,6 +51,8 @@ const Miembros = () => {
   const [position, setPosition] = useState('end');
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const fileInputRef = useRef(null);
+  const [nombreReferencia, setNombreReferencia] = useState('');
+  const [descripcionReferencia, setDescripcionReferencia] = useState('');
 
   useEffect(() => {
     // Aquí puedes realizar la llamada a la base de datos para obtener las referencias
@@ -73,7 +75,12 @@ const Miembros = () => {
     setIsModalVisible(false);
   };
 
-  const handleOk = () => {
+  const handleCreateReference = () => {
+    // Aquí puedes manejar la creación de la referencia
+    console.log('Nombre de la referencia:', nombreReferencia);
+    console.log('Descripción de la referencia:', descripcionReferencia);
+    setNombreReferencia('');
+    setDescripcionReferencia('');
     setIsModalVisible(false);
   };
 
@@ -132,9 +139,10 @@ const Miembros = () => {
       <Modal
         title="Agregar Referencia"
         visible={isModalVisible}
-        onOk={handleOk}
+        onOk={handleCreateReference}
         onCancel={handleCancel}
         footer={null}
+        width={800} // Ajusta el ancho del modal aquí
       >
         <div
           style={{
@@ -147,12 +155,25 @@ const Miembros = () => {
         >
           <Input
             shape="round"
-            placeholder="Nombre del Proyecto"
+            placeholder="Nombre de la Referencia"
+            value={nombreReferencia}
+            onChange={(e) => setNombreReferencia(e.target.value)}
             style={{
-              marginBottom: '5px',
-              width: '300px',
+              marginBottom: '10px',
+              width: '100%', // Ajusta el ancho del input
               borderRadius: '25px',
               height: '40px',
+            }}
+          />
+          <Input.TextArea
+            placeholder="Descripción de la Referencia"
+            value={descripcionReferencia}
+            onChange={(e) => setDescripcionReferencia(e.target.value)}
+            style={{
+              marginBottom: '10px',
+              width: '100%', // Ajusta el ancho del textarea
+              borderRadius: '25px',
+              height: '120px', // Tres veces la altura del nombre
             }}
           />
           <Button
@@ -161,7 +182,7 @@ const Miembros = () => {
             icon={<FileImageOutlined />}
             iconPosition={position}
             onClick={handleButtonClick}
-            style={{ width: '300px', height: '40px', fontSize: '18px' }}
+            style={{ width: '100%', height: '40px', fontSize: '18px' }} // Ajusta el ancho del botón
           >
             Imagen de previsualización
           </Button>
@@ -170,15 +191,15 @@ const Miembros = () => {
             type="primary"
             icon={<FileAddOutlined />}
             iconPosition={position}
-            onClick={showModalv2}
+            onClick={handleCreateReference}
             style={{
-              width: '250px',
+              width: '100%', // Ajusta el ancho del botón
               height: '40px',
               fontSize: '18px',
               marginTop: '20px',
             }}
           >
-            Crear Proyecto
+            Crear Referencia
           </Button>
           <input
             type="file"

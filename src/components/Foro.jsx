@@ -1,32 +1,41 @@
-import Comentario from './Comentario';
-import React, { useState } from 'react';
-import { Typography, Input, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Typography, Input, Button } from 'antd';
 import { LikeOutlined, MessageOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
+
+const Comentario = ({ comment }) => {
+  return (
+    <Card style={{ marginBottom: '10px' }}>
+      <p><strong>{comment.user}</strong></p>
+      <p>{comment.text}</p>
+    </Card>
+  );
+};
 
 const Foro = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const userName = 'UsuarioPredefinido'; // Nombre de usuario predefinido
 
-  const addComment = (user, text) => {
-    setComments([...comments, { id: comments.length + 1, user, text, replies: [], level: 0 }]);
+  // Simular la obtención de datos del backend
+  const fetchComments = async () => {
+    // Aquí harías una llamada a tu backend para obtener los comentarios
+    // Por ahora, vamos a simularlo con datos de ejemplo
+    const exampleComments = [
+      { id: 1, user: 'Usuario1', text: 'Este es el primer comentario.' },
+      { id: 2, user: 'Usuario2', text: 'Este es el segundo comentario.' },
+      { id: 3, user: 'Usuario3', text: 'Este es el tercer comentario.' },
+    ];
+    setComments(exampleComments);
   };
 
-  const addReply = (id, text) => {
-    const addReplyToComment = (comments, id, text, level) => {
-      return comments.map(comment => {
-        if (comment.id === id) {
-          const newReply = { id: comments.length + 1, user: userName, text, replies: [], level: level + 1 };
-          return { ...comment, replies: [...comment.replies, newReply] };
-        } else if (comment.replies.length > 0) {
-          return { ...comment, replies: addReplyToComment(comment.replies, id, text, level) };
-        }
-        return comment;
-      });
-    };
-    setComments(addReplyToComment(comments, id, text, 0));
+  useEffect(() => {
+    fetchComments();
+  }, []);
+
+  const addComment = (user, text) => {
+    setComments([...comments, { id: comments.length + 1, user, text }]);
   };
 
   const handleCommentSubmit = (e) => {
@@ -66,7 +75,7 @@ const Foro = () => {
       </form>
       <div>
         {comments.map(comment => (
-          <Comentario key={comment.id} comment={comment} addReply={addReply} />
+          <Comentario key={comment.id} comment={comment} />
         ))}
       </div>
     </div>
