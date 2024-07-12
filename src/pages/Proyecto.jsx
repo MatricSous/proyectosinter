@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Avatar, Card, Modal, Tag, Typography, Input, Button, Col, Popconfirm, message } from 'antd';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
+import { Avatar, Card, Modal, Tag, Typography, Input, Button, Popconfirm, message } from 'antd';
 import ScrollableContainer from '../components/ScrollableList';
 import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
 import UploadFile from '../components/UploadFile';
@@ -8,9 +8,7 @@ import Miembro from '../components/Miembro';
 import Foro from '../components/Foro';
 import Referencia from '../components/Referencia';
 import image from '../images/test2.jpg'; // Asegúrate de que la ruta de la imagen sea correcta
-import { useDispatch , useSelector} from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { GetDetallesProyecto } from '../services/proyectos';
 
 const { Title } = Typography;
@@ -19,7 +17,6 @@ const placeholderFileImage = 'https://www.iconpacks.net/icons/2/free-file-icon-1
 const placeholderProyectImage = 'https://static.dezeen.com/uploads/2022/07/sq-university-of-oregon-schoolshows_dezeen_2364_col_0.jpg';
 
 const Proyecto = () => {
-
   const dispatch = useDispatch();
   const detallesProyecto = useSelector(state => state.expensesSlice.detallesProyecto);
   let { id } = useParams();
@@ -33,24 +30,24 @@ const Proyecto = () => {
   const [archivos, setArchivos] = useState([]);
   const [tags, setTags] = useState([]);
   const [archivosT, setArchivosT] = useState([]);
-  const [miembrosT,setMiembrosT] = useState([]);
+  const [miembrosT, setMiembrosT] = useState([]);
   const [description, setDescription] = useState('Descripción: Hola');
   const [projectTitle, setProjectTitle] = useState("Titulo del Proy.")
   const [creacion, setCreacion] = useState("22-22-2222");
   const [referenciasT, setReferenciasT] = useState([]);
-  const[comentariosT,setComentariosT] = useState([]);
+  const [comentariosT, setComentariosT] = useState([]);
   const [nombreUsuario, setNombreUsuario] = useState("");
+  const downloadLinkRef = useRef(null); // Reference for the hidden download link
+
   useEffect(() => {
-    // Function to fetch proyecto details
     const fetchProyectoDetails = async () => {
-        const idData = { id: id };
-        await GetDetallesProyecto(dispatch,idData);
-    }; 
-    fetchProyectoDetails();// Execute the fetch on component mount or when 'dispatch' changes
+      const idData = { id: id };
+      await GetDetallesProyecto(dispatch, idData);
+    };
+    fetchProyectoDetails();
   }, [dispatch, id]);
 
   useEffect(() => {
-    // Update state when detallesProyecto changes
     if (detallesProyecto) {
       setProyectoTags(detallesProyecto.proyectoTags || {});
       setAutoridad(detallesProyecto.autoridad || '');
@@ -58,20 +55,10 @@ const Proyecto = () => {
       setReferencias(detallesProyecto.referencias || []);
       setColaboradores(detallesProyecto.colaboradores || []);
       setArchivos(detallesProyecto.archivos || []);
-
     }
   }, [detallesProyecto]);
 
   useEffect(() => {
-    // Log variables and set proyecto and tags
-    console.log("Proyecto Tags:", proyectoTags);
-    console.log("Autoridad:", autoridad);
-    console.log("Comentarios:", comentarios);
-    console.log("Referencias:", referencias);
-    console.log("Colaboradores:", colaboradores);
-    console.log("Archivos", archivos);
-
-    // Ensure proyectoTags.tagsProyecto and proyectoTags.proyecto exist and are arrays before setting state
     if (proyectoTags && proyectoTags.tagsProyecto) {
       setTags(proyectoTags.tagsProyecto);
     }
@@ -81,96 +68,36 @@ const Proyecto = () => {
 
     const transformedArchivos = archivos.map(archivo => ({
       name: archivo.nombre,
-      fileSize: archivo.contenido.replace('.', ''), // Removing the dot from file extension
+      fileSize: archivo.contenido.replace('.', ''),
       link: archivo.ruta
     }));
-    const transformedMiembros = colaboradores.map(archivo => ({
-      nombre: archivo.nombre,
-      apellido: archivo.apellidoPat + " "+ archivo.apellidoMat,
-      mail: archivo.mail
+    const transformedMiembros = colaboradores.map(colaborador => ({
+      nombre: colaborador.nombre,
+      apellido: colaborador.apellidoPat + " " + colaborador.apellidoMat,
+      mail: colaborador.mail
     }));
-    const transformedReferentes = referencias.map(archivo => ({
-      id: archivo.id,
-      nombre: "Referencia " + id,
-      image: archivo.foto
+    const transformedReferentes = referencias.map(referencia => ({
+      id: referencia.id,
+      nombre: "Referencia " + referencia.id,
+      image: referencia.foto
     }));
-    const transformedComentarios = comentarios.map(archivo => ({
-      user: archivo.nombreCompleto,
-      text: archivo.contenido
+    const transformedComentarios = comentarios.map(comentario => ({
+      user: comentario.nombreCompleto,
+      text: comentario.contenido
     }));
 
-    setArchivosT(transformedArchivos)
-    setMiembrosT(transformedMiembros)
-    setReferenciasT(transformedReferentes)
-    setComentariosT(transformedComentarios)
-
-
-
+    setArchivosT(transformedArchivos);
+    setMiembrosT(transformedMiembros);
+    setReferenciasT(transformedReferentes);
+    setComentariosT(transformedComentarios);
   }, [proyectoTags, autoridad, comentarios, referencias, colaboradores, archivos]);
 
   useEffect(() => {
-    // Log variables when detallesProyecto changes
-    setProjectTitle(proyecto.titulo)
-    setProjectImage(proyecto.foto)
-    setDescription(proyecto.descripcion)
-    setCreacion(proyecto.creacion)
-
-    
-
-    console.log("Proyecto Tags:", proyectoTags);
-    console.log("Autoridad:", autoridad);
-    console.log("Comentarios:", comentarios);
-    console.log("Referencias:", referencias);
-    console.log("Colaboradores:", colaboradores);
-    console.log("Archivos", archivos);
-    console.log(proyecto)
-    console.log(tags)
-    console.log("AY", comentariosT)
-  
-    
+    setProjectTitle(proyecto.titulo);
+    setProjectImage(proyecto.foto);
+    setDescription(proyecto.descripcion);
+    setCreacion(proyecto.creacion?.substring(0, 10));
   }, [proyecto]);
-
-  useEffect(() => {
-    // Log variables when detallesProyecto changes
-    setCreacion(creacion.substring(0,10))
-
-    console.log("AY2",description)
-  
-    
-  }, [description]);
-
-
-
-
-  //   { name: 'Archivo 1', fileSize: 'JPG' },
-   // { name: 'Archivo 2', fileSize: '1.5 MB' },
-    //{ name: 'Archivo 3', fileSize: '3.2 MB' },
-    //{ name: 'Archivo 4', fileSize: '700 KB' },
-    //{ name: 'Archivo 5', fileSize: '1.2 MB' },
-    //{ name: 'Archivo 6', fileSize: '2.4 MB' },
-    //{ name: 'Archivo 7', fileSize: '3.1 MB' },
-  //];
-
-  const [members, setMembers] = useState([
-    { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
-    { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
-    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
-    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
-    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
-    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
-  ]);
-
-  const [referentes, setReferentes] = useState([
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-  ]);
-
-  //const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
-
 
   const [newDescription, setNewDescription] = useState('');
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
@@ -196,11 +123,20 @@ const Proyecto = () => {
     setIsDescriptionModalVisible(false);
   };
 
+  const handleDownload = (url, filename) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const renderArchivo = (archivo, index) => (
     <div
       key={index}
       className="flex items-center bg-gray-200 p-2 mb-2 rounded-lg cursor-pointer"
-      onClick={() => alert(`Downloading ${archivo.name}`)}
+      onClick={() => handleDownload(archivo.link, archivo.name)}
     >
       <img
         src={placeholderFileImage}
@@ -331,8 +267,6 @@ const Proyecto = () => {
     // Aquí deberías añadir la lógica para eliminar el proyecto
   };
 
-  //const autoridad = 1; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
-
   return (
     <>
       <Modal open={isModalVisible} onCancel={handleModal} width={'80%'}>
@@ -346,7 +280,7 @@ const Proyecto = () => {
       </Modal>
 
       <Modal open={isModalVisible4} onCancel={handleModal4} width={'80%'}>
-        <Foro commentsIn = {comentariosT} proyectIdIn={proyecto.id} />
+        <Foro commentsIn={comentariosT} proyectIdIn={proyecto.id} />
       </Modal>
 
       <Modal visible={isModalVisible3} onCancel={handleModal3} width={'40%'} footer={null}>
@@ -456,7 +390,7 @@ const Proyecto = () => {
                 />
               )}
             </div>
-            <ScrollableContainer items={tags} renderItem={renderTag} maxVisibleItems={5} />
+            <ScrollableContainer items={tags} renderItem={renderTag} maxVisibleItems={5} isHorizontal={true} />
             <div style={{ marginTop: '20px', marginBottom: '20px', width: '100%', position: 'relative' }}>
               <Title level={3} className="mb-2 text-center lg:text-left">
                 Descripción
