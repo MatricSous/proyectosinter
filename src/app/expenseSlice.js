@@ -19,6 +19,16 @@ export const expensesSlice = createSlice({
             const newExpense = { titulo, foto, ...rest };
             return { ...state, expenses: [newExpense, ...state.expenses] };
         },
+        newArchivo: (state, action) => {
+            const { id_proyecto, nombre, ruta, contenido, ...rest } = action.payload;
+            const newExpense = { id_proyecto, nombre, ruta, contenido, ...rest };
+            return { ...state, expenses: [newExpense, ...state.expenses] };
+        },
+        editProyecto: (state, action) => {
+            const { id, titulo, descripcion, foto, activo, ...rest } = action.payload;
+            const newExpense = { id, titulo, descripcion, foto, activo, titulo, foto, ...rest };
+            return { ...state, expenses: [newExpense, ...state.expenses] };
+        },
 
           setProyectoUsuario: (state, action) => {
             console.log("set");
@@ -37,6 +47,12 @@ export const expensesSlice = createSlice({
             console.log(action.payload)
             const { idProyecto, contenido, ...rest } = action.payload;
             const newExpense = { idProyecto, contenido, ...rest };
+            return { ...state, expenses: [newExpense, ...state.expenses] };
+        },
+        newReferencia: (state, action) => {
+            console.log(action.payload)
+            const { idProyecto, titulo, descripcion, foto ,...rest } = action.payload;
+            const newExpense = {  idProyecto, titulo, descripcion, foto , ...rest };
             return { ...state, expenses: [newExpense, ...state.expenses] };
         },
         setDetallesProyecto: (state, action) => {
@@ -68,10 +84,15 @@ export const expensesSlice = createSlice({
             const expenses = state.expenses.filter(expense =>
                 expense.id !== action.payload.id);
             return { ...state, expenses: [...expenses] };
+        },
+        deleteReferencia: (state, action) => {
+            const expenses = state.expenses.filter(expense =>
+                expense.id !== action.payload.id);
+            return { ...state, expenses: [...expenses] };
         }
     }
 });
 
-export const {newProyecto, newComentario, setDetallesProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
+export const {newProyecto, deleteReferencia, newArchivo, newReferencia, editProyecto, newComentario, setDetallesProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
 
 export default expensesSlice.reducer;

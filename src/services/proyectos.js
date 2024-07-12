@@ -1,5 +1,5 @@
-import {
-    setExpenses, setProyectoUsuario, setDetallesProyecto, newComentario, newProyecto, editExpense, deleteExpense,
+import {editProyecto,
+    setExpenses, deleteReferencia, newReferencia, newArchivo, setProyectoUsuario, setDetallesProyecto, newComentario, newProyecto, editExpense, deleteExpense,
     setExpensesError, editExpenseError, newProyectoError, deleteExpenseError
 } from '../app/expenseSlice';
 import axios from 'axios';
@@ -47,6 +47,41 @@ export const crearProyecto = async (dispatch, proyecto) => {
     }
 }
 
+export const crearArchivo= async (dispatch, proyecto) => {
+    try {
+        // api call
+        console.log(proyecto)
+        const { data } = await axiosInstance.post('crearArchivo', proyecto);
+        dispatch(newReferencia(data));
+    } catch {
+        dispatch(newProyectoError());
+    }
+}
+
+
+export const crearReferencia = async (dispatch, proyecto) => {
+    try {
+        // api call
+        console.log(proyecto)
+        const { data } = await axiosInstance.post('crearReferencia', proyecto);
+        dispatch(newArchivo(data));
+    } catch {
+        dispatch(newProyectoError());
+    }
+}
+
+
+
+export const editarProyecto = async (dispatch, proyecto) => {
+    try {
+        // api call
+        const { data } = await axiosInstance.put('', proyecto);
+        dispatch(editProyecto(data));
+    } catch {
+        dispatch(newProyectoError());
+    }
+}
+
 export const comentar = async (dispatch, comentario) => {
     try {
         // api call
@@ -75,6 +110,17 @@ export const EditExpense = async (dispatch, expense) => {
         dispatch(editExpense(expense));
     } catch {
         dispatch(editExpenseError());
+    }
+}
+
+export const eliminarReferencia = async (dispatch, expense) => {
+    try {
+        // api call
+        console.log(expense)
+        await axiosInstance.delete('eliminarReferencia', { data: { ...expense }});
+        dispatch(deleteReferencia(expense));
+    } catch {
+        dispatch(deleteExpenseError());
     }
 }
 

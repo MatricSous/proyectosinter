@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Avatar, Row, Col, Modal, Input, Button, Space } from 'antd';
-import { UserAddOutlined, CloseOutlined, PlusCircleOutlined, FileImageOutlined, FileAddOutlined } from '@ant-design/icons';
+import { Avatar, Row, Col, Modal, Input, Button, Space, notification } from 'antd';
+import { UserAddOutlined, CloseOutlined, PlusCircleOutlined, PictureOutlined, FileImageOutlined, FileAddOutlined } from '@ant-design/icons';
 import image from '../images/test2.jpg';
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
+import { useDispatch } from 'react-redux';
+import { jwtDecode } from 'jwt-decode';
+import { ImageDB } from '../Config';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { crearReferencia, eliminarReferencia } from '../services/proyectos';
 
 const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
   const navigate = useNavigate(); // Utiliza el hook useNavigate
@@ -14,19 +19,19 @@ const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
           <Avatar
             className="w-full h-full p-10"
             icon={<PlusCircleOutlined style={{ fontSize: '100px', color: '#b22222' }} />}
-            style={{ backgroundColor: '#f0f0f0', cursor: 'pointer' }}
+            style={{ backgroundColor: '#f0f0f0', cursor: 'pointer', width: '200px', height: '200px', borderRadius: '0' }}
             onClick={onInviteClick}
           />
         ) : (
           <Avatar
             className="w-full h-full p-10"
-            src={member.image}
-            style={{ backgroundColor: '#fff', cursor: 'pointer' }}
-            onClick={() => navigate(`/Proyectos/${member.id}/Referencia`)} // Utiliza navigate para redirigir
+            src={member.foto || image} // Fallback to a default image if member.image is undefined
+            style={{ backgroundColor: '#fff', cursor: 'pointer', width: '150px', height: '150px', borderRadius: '0' }}
+            onClick={() => navigate(`/Proyecto/Referencia/${member.id}`)} // Utiliza navigate para redirigir
           />
         )}
         <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
-          {member.name}
+          {member.titulo}
           {!member.isInvite && (
             <Space style={{ position: 'absolute', top: 0, right: 0 }}>
               <CloseOutlined
@@ -36,35 +41,27 @@ const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
             </Space>
           )}
         </div>
+        <div style={{ marginTop: '5px', fontSize: '14px', color: '#888' }}>
+          {member.title}
+        </div>
       </div>
     </Col>
   );
 };
 
-const Miembros = () => {
+const Miembros = ({ membersIn , idProyectoIn}) => {
+  const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [members, setMembers] = useState([
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-  ]); // Ejemplo de lista de miembros inicial
-  const [references, setReferences] = useState([]);
-  const [position, setPosition] = useState('end');
+  const [members, setMembers] = useState(membersIn || []); // Initialize members from membersIn object
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const fileInputRef = useRef(null);
   const [nombreReferencia, setNombreReferencia] = useState('');
   const [descripcionReferencia, setDescripcionReferencia] = useState('');
+  const [imagensubida, setImagenSubida] = useState(null);
+  const [imagensubidaName, setImagenSubidaName] = useState('');
 
   useEffect(() => {
-    // Aquí puedes realizar la llamada a la base de datos para obtener las referencias
-    const fetchReferences = async () => {
-      const fetchedReferences = [
-        { id: 1, name: 'Referencia 1', image: image },
-        { id: 2, name: 'Referencia 2', image: 'url-de-la-imagen-2' },
-      ];
-      setReferences(fetchedReferences);
-    };
-
-    fetchReferences();
+    setMembers(membersIn || []); // Update members if membersIn changes
   }, []);
 
   const showModal = () => {
@@ -75,24 +72,95 @@ const Miembros = () => {
     setIsModalVisible(false);
   };
 
-  const handleCreateReference = () => {
-    // Aquí puedes manejar la creación de la referencia
+  const postReferencia = async(newReference) => {
+  
+    try {
+      await crearReferencia(dispatch, newReference);
+      //navigate('/inicio'); // Redirect upon successful login
+    } catch (error) {
+      console.error('No se pudo crear proyecto:', error);
+  }
+  }
+
+  const handleCreateReference = async () => {
+    if (!nombreReferencia){
+
+      return;
+    }
+
+    if (!imagensubida) {
+
+      return;
+    }
+
+    const token = localStorage.getItem('ACCESS_TOKEN');
+    const tokenDec = jwtDecode(token);
+    const mail = tokenDec.unique_name;
+    const timestamp = new Date().getTime(); // Add timestamp to ensure uniqueness
+    const fileName1 = `${mail}-${nombreReferencia}-${timestamp}-${imagensubidaName}`; // Assuming projectTitle and fileName are defined somewhere
+  
+    const imgRef = ref(ImageDB, `files/${fileName1}`);
+    console.log(imgRef);
+  
+    try {
+      // Check if the file with the same name exists
+  
+      await uploadBytes(imgRef, imagensubida);
+      console.log('Uploaded a blob or file!');
+  
+      const downloadURL = await getDownloadURL(imgRef);
+      console.log(downloadURL);
+
+      const newReference = {
+          id_proyecto: idProyectoIn,
+          titulo: nombreReferencia, // Adjust based on user input
+          descripcion: descripcionReferencia, // You may need to implement the logic for project description
+          foto: downloadURL, // Assuming imgRef is the URL or reference to the uploaded photo
+        }
+
+      postReferencia(newReference)
+
+    } catch (error) {
+      console.error('Upload failed:', error);
+
+    }
+
+
     console.log('Nombre de la referencia:', nombreReferencia);
     console.log('Descripción de la referencia:', descripcionReferencia);
+
+
+
     setNombreReferencia('');
     setDescripcionReferencia('');
     setIsModalVisible(false);
+
+    // Add the new reference to the members list
+    window.location.reload()
   };
 
-  const addMember = (reference) => {
-    const newMember = { ...reference, isInvite: false };
-    setMembers([...members, newMember]);
-    setIsModalVisible(false);
-  };
+
 
   const removeMember = (id) => {
-    const updatedMembers = members.filter(member => member.id !== id);
-    setMembers(updatedMembers);
+    // Mostrar confirmación antes de borrar
+    Modal.confirm({
+      title: 'Confirmación',
+      content: '¿Estás seguro de que quieres eliminar esta referencia?',
+      okText: 'Eliminar',
+      cancelText: 'Cancelar',
+
+      
+      onOk: () => {
+        console.log(id)
+        const idData = { id: id.toString() };
+        eliminarReferencia(dispatch, idData)
+        const updatedMembers = members.filter(member => member.id !== id);        
+        setMembers(updatedMembers);
+      },
+      onCancel: () => {
+        console.log('Cancelado');
+      },
+    });
   };
 
   const handleButtonClick = () => {
@@ -102,35 +170,42 @@ const Miembros = () => {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Aquí puedes manejar la imagen cargada como necesites
-      console.log('Imagen cargada:', file);
+      setImagenSubida(file);
+      setImagenSubidaName(file.name);
     }
   };
 
-  const showModalv2 = () => {
-    setIsModalVisible(true);
-    window.location.href = '/proyecto#/Referencia';
-  };
-
-  const handleCancel2 = () => {
+  const handlePopupClose = () => {
     setIsModalVisible2(false);
-  };
-
-  const Buscador = () => {
-    setIsModalVisible2(true);
   };
 
   return (
     <div style={{ padding: '50px 20px', backgroundColor: '#fafafa' }}>
       <Row justify="space-around" align="middle">
-        {members.map(member => (
-          <UserCard
-            key={member.id}
-            member={member}
-            onRemoveClick={removeMember}
-            onInviteClick={showModal}
-          />
-        ))}
+        {members.length === 0 ? (
+          <Col style={{ textAlign: 'center', margin: '15px' }}>
+            <div style={{ textAlign: 'center', margin: '15px', position: 'relative' }}>
+              <Avatar
+                className="w-full h-full p-10"
+                icon={<PictureOutlined style={{ fontSize: '100px', color: '#b22222' }} />}
+                style={{ backgroundColor: '#f0f0f0', cursor: 'pointer' }}
+                onClick={showModal}
+              />
+              <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
+                Agregar Referencia
+              </div>
+            </div>
+          </Col>
+        ) : (
+          members.map(member => (
+            <UserCard
+              key={member.id}
+              member={member}
+              onRemoveClick={removeMember}
+              onInviteClick={showModal}
+            />
+          ))
+        )}
         <UserCard
           member={{ id: 'invite', name: 'Agregar Referencia', isInvite: true }}
           onInviteClick={showModal}
@@ -180,17 +255,27 @@ const Miembros = () => {
             shape="round"
             type="primary"
             icon={<FileImageOutlined />}
-            iconPosition={position}
+            iconPosition="start"
             onClick={handleButtonClick}
             style={{ width: '100%', height: '40px', fontSize: '18px' }} // Ajusta el ancho del botón
           >
             Imagen de previsualización
           </Button>
+                    {/* Preview the uploaded image */}
+          {imagensubida && (
+            <div style={{ marginBottom: '10px' }}>
+              <img
+                src={URL.createObjectURL(imagensubida)}
+                alt="Preview"
+                style={{ width: '300px', height: '200px', objectFit: 'cover' }}
+              />
+            </div>
+          )}
           <Button
             shape="round"
             type="primary"
             icon={<FileAddOutlined />}
-            iconPosition={position}
+            iconPosition="start"
             onClick={handleCreateReference}
             style={{
               width: '100%', // Ajusta el ancho del botón
@@ -215,3 +300,4 @@ const Miembros = () => {
 };
 
 export default Miembros;
+

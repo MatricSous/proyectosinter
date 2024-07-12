@@ -12,7 +12,10 @@ import { useDispatch , useSelector} from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { GetDetallesProyecto } from '../services/proyectos';
-
+import { editarProyecto } from '../services/proyectos';
+import { ImageDB } from '../Config';
+import { uploadBytes, ref, getDownloadURL} from 'firebase/storage';
+import { jwtDecode } from 'jwt-decode';
 const { Title } = Typography;
 
 const placeholderFileImage = 'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png';
@@ -40,6 +43,11 @@ const Proyecto = () => {
   const [referenciasT, setReferenciasT] = useState([]);
   const[comentariosT,setComentariosT] = useState([]);
   const [nombreUsuario, setNombreUsuario] = useState("");
+  const [tituloNuevo, setTituloNuevo] = useState('');
+  const[errorMessage, setErrorMessage] = useState('');
+  const [projectImage, setProjectImage] = useState(placeholderProyectImage);
+
+
   useEffect(() => {
     // Function to fetch proyecto details
     const fetchProyectoDetails = async () => {
@@ -53,7 +61,7 @@ const Proyecto = () => {
     // Update state when detallesProyecto changes
     if (detallesProyecto) {
       setProyectoTags(detallesProyecto.proyectoTags || {});
-      setAutoridad(detallesProyecto.autoridad || '');
+      setAutoridad(parseInt(detallesProyecto.autoridad) || '');
       setComentarios(detallesProyecto.comentarios || []);
       setReferencias(detallesProyecto.referencias || []);
       setColaboradores(detallesProyecto.colaboradores || []);
@@ -92,7 +100,8 @@ const Proyecto = () => {
     const transformedReferentes = referencias.map(archivo => ({
       id: archivo.id,
       nombre: "Referencia " + id,
-      image: archivo.foto
+      image: archivo.foto,
+      titulo: archivo.titulo
     }));
     const transformedComentarios = comentarios.map(archivo => ({
       user: archivo.nombreCompleto,
@@ -151,29 +160,33 @@ const Proyecto = () => {
     //{ name: 'Archivo 7', fileSize: '3.1 MB' },
   //];
 
-  const [members, setMembers] = useState([
-    { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
-    { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
-    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
-    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
-    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
-    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
-  ]);
+  //const [members, setMembers] = useState([
+    //{ id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
+   // { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
+   // { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+    //{ id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+   // { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
+   // { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
+//  ]);
 
-  const [referentes, setReferentes] = useState([
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
-    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-  ]);
+ // const [referentes, setReferentes] = useState([
+ //   { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+  //  { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+  //  { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+   // { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+   // { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+   // { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+ // ]);
 
   //const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
 
 
   const [newDescription, setNewDescription] = useState('');
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
+
+  const handleTituloNuevo = (e) => {
+    setTituloNuevo(e.target.value);
+  };
 
   const showDescriptionModal = () => {
     setNewDescription(description);
@@ -182,25 +195,39 @@ const Proyecto = () => {
 
   const handleDescriptionOk = () => {
     setIsDescriptionModalVisible(false);
-    Modal.confirm({
-      title: 'Confirmar cambio',
-      content: '¿Estás seguro de cambiar la descripción?',
-      onOk: () => {
-        setDescription(newDescription);
-        message.success('Descripción actualizada');
-      },
-    });
+    
+    const newProject = {
+      id: proyecto.id, // You may need to generate or handle this dynamically
+      titulo: projectTitle, // Adjust based on user input
+      descripcion: newDescription, // You may need to implement the logic for project description // Current timestamp
+      foto: projectImage, // Assuming imgRef is the URL or reference to the uploaded photo
+      activo: true
+    };
+
+    handleEditarProyecto(newProject)
+
+    message.success("desc")
+
   };
 
   const handleDescriptionCancel = () => {
     setIsDescriptionModalVisible(false);
   };
 
+  const handleDownload = (url, filename) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const renderArchivo = (archivo, index) => (
     <div
       key={index}
       className="flex items-center bg-gray-200 p-2 mb-2 rounded-lg cursor-pointer"
-      onClick={() => alert(`Downloading ${archivo.name}`)}
+      onClick={() => handleDownload(archivo.link, archivo.name)}
     >
       <img
         src={placeholderFileImage}
@@ -253,22 +280,97 @@ const Proyecto = () => {
     setIsModalVisible(!isModalVisible);
   };
 
+  const handleEditarProyecto = async (proyecto) => {
+  
+    try {
+      await editarProyecto(dispatch, proyecto);
+      //navigate('/inicio'); // Redirect upon successful login
+    } catch (error) {
+      console.error('No se pudo editar el proyecto:', error);
+    }
+
+    setIsModalVisible(false);
+    window.location.reload();
+    //window.location.href = '/proyecto#/Proyectos/1/Proyecto';
+
+  };
+
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const handleModal2 = () => {
     setIsModalVisible2(!isModalVisible2);
   };
+  const handleModal2Submit = () => {
+    if (!tituloNuevo || tituloNuevo == ""){
+      setErrorMessage('Por favor, ingrese un titulo para el proyecto.');
+      return;
+    }
+
+    const newProject = {
+        id: proyecto.id, // You may need to generate or handle this dynamically
+        titulo: tituloNuevo, // Adjust based on user input
+        descripcion: proyecto.descripcion, // You may need to implement the logic for project description // Current timestamp
+        foto: projectImage, // Assuming imgRef is the URL or reference to the uploaded photo
+        activo: true
+      };
+    handleEditarProyecto(newProject);
+    setIsModalVisible2(!isModalVisible2);
+  };
 
   const [isModalVisible3, setIsModalVisible3] = useState(false);
-  const handleModal3 = () => {
+
+  const handleModal3Change = () => {
     setIsModalVisible3(!isModalVisible3);
   };
+  const handleModal3 = async () => {
+  
+    if (!newProjectImage) {
+      return;
+    }
+    const token = localStorage.getItem('ACCESS_TOKEN');
+    const tokenDec = jwtDecode(token);
+    const mail = tokenDec.unique_name;
+    const timestamp = new Date().getTime(); // Add timestamp to ensure uniqueness
+    const fileName1 = `${mail}-${projectTitle}-${timestamp}-${newProjectImageName}`; // Assuming projectTitle and fileName are defined somewhere
+  
+    const imgRef = ref(ImageDB, `files/${fileName1}`);
+    console.log(imgRef);
+    try {
+      // Check if the file with the same name exists
+  
+      await uploadBytes(imgRef, newProjectImage);
+      console.log('Uploaded a blob or file!');
+  
+      const downloadURL = await getDownloadURL(imgRef);
+      console.log(downloadURL);
+
+
+      const newProject = {
+        id: proyecto.id, // You may need to generate or handle this dynamically
+        titulo: projectTitle, // Adjust based on user input
+        descripcion: proyecto.descripcion, // You may need to implement the logic for project description // Current timestamp
+        foto: downloadURL, // Assuming imgRef is the URL or reference to the uploaded photo
+        activo: true
+      };
+      handleEditarProyecto(newProject);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setErrorMessage('Hubo un error al subir la imagen, intenta nuevamente');
+    }
+
+
+    setIsModalVisible3(!isModalVisible3);
+  };
+
+
 
   const [isModalVisibleMiembro, setIsModalVisibleMiembro] = useState(false);
   const handleModalMiembro = () => {
     setIsModalVisibleMiembro(!isModalVisibleMiembro);
   };
 
-  const [projectImage, setProjectImage] = useState(placeholderProyectImage);
+  const [newProjectImage, setNewProjectImage] = useState(null);
+  const [newProjectImageName, setNewProjectImageName] = useState('');
+
   const fileInputRef = useRef(null);
 
   const handleButtonClick = () => {
@@ -276,14 +378,12 @@ const Proyecto = () => {
   };
 
   const [showButton, setShowButton] = useState(false);
+
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProjectImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setNewProjectImage(file);
+      setNewProjectImageName(file.name)
       setShowButton(true);
     }
   };
@@ -315,7 +415,7 @@ const Proyecto = () => {
       cover={
         <div style={{ width: '100%', height: '100px', overflow: 'hidden' }}>
           <img
-            alt={referente.name}
+            alt={referente.titulo}
             src={referente.image}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
@@ -336,10 +436,10 @@ const Proyecto = () => {
   return (
     <>
       <Modal open={isModalVisible} onCancel={handleModal} width={'80%'}>
-        <UploadFile />
+        <UploadFile idProyecto = {proyecto.id} />
       </Modal>
       <Modal open={isModalVisibleReferencia} onCancel={handleModalReferencia} width={'80%'}>
-        <Referencia />
+        <Referencia membersIn = {referencias} idProyectoIn={proyecto.id} />
       </Modal>
       <Modal open={isModalVisibleMiembro} onCancel={handleModalMiembro} width={'80%'}>
         <Miembro />
@@ -349,7 +449,7 @@ const Proyecto = () => {
         <Foro commentsIn = {comentariosT} proyectIdIn={proyecto.id} />
       </Modal>
 
-      <Modal visible={isModalVisible3} onCancel={handleModal3} width={'40%'} footer={null}>
+      <Modal visible={isModalVisible3} onCancel={handleModal3Change} width={'40%'} footer={null}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%' }}>
           <Button
             shape="round"
@@ -358,7 +458,7 @@ const Proyecto = () => {
             onClick={handleButtonClick}
             style={{ width: '400px', height: '70px', fontSize: '20px', marginBottom: '20px' }}
           >
-            Cambiar Imagen de previsualización
+            Cambiar Imagen
           </Button>
           <input
             type="file"
@@ -367,6 +467,17 @@ const Proyecto = () => {
             accept="image/*"
             onChange={handleImageUpload}
           />
+    
+          {/* Preview the uploaded image */}
+          {newProjectImage && (
+            <div style={{ marginBottom: '10px' }}>
+              <img
+                src={URL.createObjectURL(newProjectImage)}
+                alt="Preview"
+                style={{ width: '300px', height: '200px', objectFit: 'cover' }}
+              />
+            </div>
+          )}
           {showButton && (
             <Button
               type="primary"
@@ -381,45 +492,47 @@ const Proyecto = () => {
       </Modal>
 
       <Modal
-        visible={isModalVisible2}
-        onCancel={handleModal2}
-        width={'25%'}
-        footer={null}
+      visible={isModalVisible2}
+      onCancel={handleModal2}
+      width={'25%'}
+      footer={null}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+        }}
       >
-        <div
+        <Input
+          shape="round"
+          placeholder="Nombre del Proyecto"
+          value={tituloNuevo}
+          onChange={handleTituloNuevo}
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
+            marginBottom: '5px',
+            width: '300px',
+            borderRadius: '25px',
+            height: '40px',
           }}
+        />
+        <Button
+          type="primary"
+          shape="round"
+          style={{
+            width: '200px',
+            height: '40px',
+            fontSize: '18px',
+            marginTop: '20px',
+          }}
+          onClick={handleModal2Submit}
         >
-          <Input
-            shape="round"
-            placeholder="Nombre del Proyecto"
-            style={{
-              marginBottom: '5px',
-              width: '300px',
-              borderRadius: '25px',
-              height: '40px',
-            }}
-          />
-          <Button
-            type="primary"
-            shape="round"
-            style={{
-              width: '200px',
-              height: '40px',
-              fontSize: '18px',
-              marginTop: '20px',
-            }}
-            onClick={handleModal2}
-          >
-            Aceptar<LikeOutlined />
-          </Button>
-        </div>
-      </Modal>
+          Aceptar <LikeOutlined />
+        </Button>
+      </div>
+    </Modal>
 
       <Modal
         visible={isDescriptionModalVisible}
@@ -452,7 +565,7 @@ const Proyecto = () => {
                 <EditOutlined
                   className="absolute top-0 right-0 m-2 text-white bg-black rounded-full p-1"
                   size={20}
-                  onClick={handleModal3}
+                  onClick={handleModal3Change}
                 />
               )}
             </div>
