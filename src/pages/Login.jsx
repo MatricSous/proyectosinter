@@ -3,29 +3,37 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../images/image-1@2x.png';
+import { useDispatch } from 'react-redux';
+import { SignIn } from '../services/authentication';
+import { useAuth } from '../providers/AuthProvider';
 
 const { Title } = Typography;
 
 export const Login = ({ className, buttonText = 'Iniciar Sesión' }) => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado local para simular si el usuario está logueado
+  const [Mail, setMail] = useState('');
+  const [Clave, setClave] = useState('');
+  const [error, setError] = useState('');
+  const dispatch = useDispatch();
 
-  const onFinish = (values) => {
-    // Simulación de inicio de sesión exitoso
-    console.log('Success:', values);
-    setIsLoggedIn(true); // Simular que el usuario ha iniciado sesión correctamente
-    navigate('/inicio'); // Redirigir a la página de inicio después del inicio de sesión
+
+  const {user} =  useAuth();
+  console.log(user)
+
+
+  const handleLogin = async (values) => {
+    try {
+      await SignIn(dispatch, values);
+      navigate('/inicio'); // Redirect upon successful login
+    } catch (error) {
+      console.error('Login failed:', error);
+      setError('Correo o contraseña incorrectos. Intente nuevamente.'); // Set error message
+    }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+  const clearError = () => {
+    setError(''); // Clear error message
   };
-
-  // Si el usuario ya está logueado, redirigir directamente a la página de inicio
-  if (isLoggedIn) {
-    navigate('/inicio');
-    return null; // Opcional: puedes renderizar algo aquí mientras se redirige
-  }
 
   return (
     <div
@@ -39,27 +47,27 @@ export const Login = ({ className, buttonText = 'Iniciar Sesión' }) => {
         <Title level={2} className="login-title" style={styles.title}>
           ArquiUDP
         </Title>
+        {error && <div style={styles.error}>{error}</div>} {/* Display error message if exists */}
         <Form
           name="login"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+          initialValues={{ Mail: '', Clave: '' }}
           layout="vertical"
+          onFinish={handleLogin} // Use onFinish to handle form submission
         >
           <Form.Item
             label="Mail UDP"
-            name="username"
+            name="Mail"
             rules={[{ required: true, message: 'Por favor ingrese su correo' }]}
           >
-            <Input />
+            <Input value={Mail} onChange={(e) => setMail(e.target.value)} />
           </Form.Item>
 
           <Form.Item
             label="Contraseña"
-            name="password"
+            name="Clave"
             rules={[{ required: true, message: 'Por favor ingrese su contraseña' }]}
           >
-            <Input.Password />
+            <Input.Password value={Clave} onChange={(e) => setClave(e.target.value)} />
           </Form.Item>
 
           <Form.Item>
@@ -75,6 +83,7 @@ export const Login = ({ className, buttonText = 'Iniciar Sesión' }) => {
                 borderWidth: '2px',
                 fontWeight: 'bold',
               }}
+              onClick={clearError} // Clear error message on button click
             >
               {buttonText}
             </Button>
@@ -120,6 +129,11 @@ const styles = {
   },
   button: {
     width: '100%',
+  },
+  error: {
+    color: 'red',
+    marginBottom: '1rem',
+    textAlign: 'center',
   },
 };
 

@@ -1,62 +1,223 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Avatar, Card, Modal, Tag, Typography, Input, Button, Col, Popconfirm, message} from 'antd';
+import { useNavigate, Link } from 'react-router-dom';
+import { Avatar, Card, Modal, Tag, Typography, Input, Button, Col, Popconfirm, message } from 'antd';
 import ScrollableContainer from '../components/ScrollableList';
-import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, WindowsOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
 import UploadFile from '../components/UploadFile';
 import Miembro from '../components/Miembro';
-import { Link } from 'react-router-dom';
-import image from '../images/test2.jpg';
 import Foro from '../components/Foro';
 import Referencia from '../components/Referencia';
+import image from '../images/test2.jpg'; // Asegúrate de que la ruta de la imagen sea correcta
+import { useDispatch , useSelector} from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { GetDetallesProyecto } from '../services/proyectos';
 
 const { Title } = Typography;
 
-const placeholderUserImage =
-  'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-const placeholderFileImage =
-  'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png';
-const placeholderProyectImage =
-  'https://static.dezeen.com/uploads/2022/07/sq-university-of-oregon-schoolshows_dezeen_2364_col_0.jpg';
+const placeholderFileImage = 'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png';
+const placeholderProyectImage = 'https://static.dezeen.com/uploads/2022/07/sq-university-of-oregon-schoolshows_dezeen_2364_col_0.jpg';
 
 const Proyecto = () => {
-  const archivos = [
-    { name: 'Archivo 1', fileSize: '2 MB' },
-    { name: 'Archivo 2', fileSize: '1.5 MB' },
-    { name: 'Archivo 3', fileSize: '3.2 MB' },
-    { name: 'Archivo 4', fileSize: '700 KB' },
-  ];
-  //const miembros = ['Miembro 1', 'Miembro 2', 'Miembro 3', 'Miembro 4'];
+
+  const dispatch = useDispatch();
+  const detallesProyecto = useSelector(state => state.expensesSlice.detallesProyecto);
+  let { id } = useParams();
+  const [autoridad, setAutoridad] = useState('');
+  const [proyectoTags, setProyectoTags] = useState({});
+  const [proyecto, setProyecto] = useState({});
+
+  const [comentarios, setComentarios] = useState([]);
+  const [referencias, setReferencias] = useState([]);
+  const [colaboradores, setColaboradores] = useState([]);
+  const [archivos, setArchivos] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [archivosT, setArchivosT] = useState([]);
+  const [miembrosT,setMiembrosT] = useState([]);
+  const [description, setDescription] = useState('Descripción: Hola');
+  const [projectTitle, setProjectTitle] = useState("Titulo del Proy.")
+  const [creacion, setCreacion] = useState("22-22-2222");
+  const [referenciasT, setReferenciasT] = useState([]);
+  const[comentariosT,setComentariosT] = useState([]);
+  const [nombreUsuario, setNombreUsuario] = useState("");
+  useEffect(() => {
+    // Function to fetch proyecto details
+    const fetchProyectoDetails = async () => {
+        const idData = { id: id };
+        await GetDetallesProyecto(dispatch,idData);
+    }; 
+    fetchProyectoDetails();// Execute the fetch on component mount or when 'dispatch' changes
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    // Update state when detallesProyecto changes
+    if (detallesProyecto) {
+      setProyectoTags(detallesProyecto.proyectoTags || {});
+      setAutoridad(detallesProyecto.autoridad || '');
+      setComentarios(detallesProyecto.comentarios || []);
+      setReferencias(detallesProyecto.referencias || []);
+      setColaboradores(detallesProyecto.colaboradores || []);
+      setArchivos(detallesProyecto.archivos || []);
+
+    }
+  }, [detallesProyecto]);
+
+  useEffect(() => {
+    // Log variables and set proyecto and tags
+    console.log("Proyecto Tags:", proyectoTags);
+    console.log("Autoridad:", autoridad);
+    console.log("Comentarios:", comentarios);
+    console.log("Referencias:", referencias);
+    console.log("Colaboradores:", colaboradores);
+    console.log("Archivos", archivos);
+
+    // Ensure proyectoTags.tagsProyecto and proyectoTags.proyecto exist and are arrays before setting state
+    if (proyectoTags && proyectoTags.tagsProyecto) {
+      setTags(proyectoTags.tagsProyecto);
+    }
+    if (proyectoTags && proyectoTags.proyecto) {
+      setProyecto(proyectoTags.proyecto);
+    }
+
+    const transformedArchivos = archivos.map(archivo => ({
+      name: archivo.nombre,
+      fileSize: archivo.contenido.replace('.', ''), // Removing the dot from file extension
+      link: archivo.ruta
+    }));
+    const transformedMiembros = colaboradores.map(archivo => ({
+      nombre: archivo.nombre,
+      apellido: archivo.apellidoPat + " "+ archivo.apellidoMat,
+      mail: archivo.mail
+    }));
+    const transformedReferentes = referencias.map(archivo => ({
+      id: archivo.id,
+      nombre: "Referencia " + id,
+      image: archivo.foto
+    }));
+    const transformedComentarios = comentarios.map(archivo => ({
+      user: archivo.nombreCompleto,
+      text: archivo.contenido
+    }));
+
+    setArchivosT(transformedArchivos)
+    setMiembrosT(transformedMiembros)
+    setReferenciasT(transformedReferentes)
+    setComentariosT(transformedComentarios)
+
+
+
+  }, [proyectoTags, autoridad, comentarios, referencias, colaboradores, archivos]);
+
+  useEffect(() => {
+    // Log variables when detallesProyecto changes
+    setProjectTitle(proyecto.titulo)
+    setProjectImage(proyecto.foto)
+    setDescription(proyecto.descripcion)
+    setCreacion(proyecto.creacion)
+
+    
+
+    console.log("Proyecto Tags:", proyectoTags);
+    console.log("Autoridad:", autoridad);
+    console.log("Comentarios:", comentarios);
+    console.log("Referencias:", referencias);
+    console.log("Colaboradores:", colaboradores);
+    console.log("Archivos", archivos);
+    console.log(proyecto)
+    console.log(tags)
+    console.log("AY", comentariosT)
+  
+    
+  }, [proyecto]);
+
+  useEffect(() => {
+    // Log variables when detallesProyecto changes
+    setCreacion(creacion.substring(0,10))
+
+    console.log("AY2",description)
+  
+    
+  }, [description]);
+
+
+
+
+  //   { name: 'Archivo 1', fileSize: 'JPG' },
+   // { name: 'Archivo 2', fileSize: '1.5 MB' },
+    //{ name: 'Archivo 3', fileSize: '3.2 MB' },
+    //{ name: 'Archivo 4', fileSize: '700 KB' },
+    //{ name: 'Archivo 5', fileSize: '1.2 MB' },
+    //{ name: 'Archivo 6', fileSize: '2.4 MB' },
+    //{ name: 'Archivo 7', fileSize: '3.1 MB' },
+  //];
 
   const [members, setMembers] = useState([
-    { id: 1, name: 'Nombre usuario 1', isInvite: false },
-    { id: 2, name: 'Nombre usuario 2', isInvite: false },
-  ]); // Ejemplo de lista de miembros inicial
+    { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
+    { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
+    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+    { id: 3, nombre: 'Nombre', apellido: 'Usuario3', isInvite: false },
+    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
+    { id: 4, nombre: 'Nombre', apellido: 'Usuario4', isInvite: false },
+  ]);
 
-  const miembros = members.map(member => member.name);
-
-  const handleModalMiembro1 = () => {
-    // Lógica para mostrar modal o realizar alguna acción al hacer clic en el icono
-    console.log('Mostrar modal para agregar miembro');
-  };
-
-  const renderMiembro1 = (miembro, index) => (
-    <div key={index} className="flex flex-col items-center">
-    <Avatar size={64} className="bg-gray-300" src={placeholderUserImage} />
-    <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>{miembro}</p>
-  </div>
-  );
-  const [referentes, setreferentes] = useState([
+  const [referentes, setReferentes] = useState([
     { id: 1, name: 'Referencia 1', isInvite: false, image: image },
     { id: 2, name: 'Referencia 2', isInvite: false, image: image },
-  ]); // Ejemplo de lista de miembros inicial
-  const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
+    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+    { id: 1, name: 'Referencia 1', isInvite: false, image: image },
+    { id: 2, name: 'Referencia 2', isInvite: false, image: image },
+  ]);
+
+  //const tags = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 2'];
+
+
+  const [newDescription, setNewDescription] = useState('');
+  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
+
+  const showDescriptionModal = () => {
+    setNewDescription(description);
+    setIsDescriptionModalVisible(true);
+  };
+
+  const handleDescriptionOk = () => {
+    setIsDescriptionModalVisible(false);
+    Modal.confirm({
+      title: 'Confirmar cambio',
+      content: '¿Estás seguro de cambiar la descripción?',
+      onOk: () => {
+        setDescription(newDescription);
+        message.success('Descripción actualizada');
+      },
+    });
+  };
+
+  const handleDescriptionCancel = () => {
+    setIsDescriptionModalVisible(false);
+  };
+
+  const handleRemoveArchivo = (index) => {
+    Modal.confirm({
+      title: 'Confirmar Eliminar',
+      content: '¿Estás seguro de Eliminar el Archivo?',
+      onCancel: () => {
+        // Acción a realizar en caso de cancelar
+        message.info('Eliminación cancelada');
+      },
+      onOk: () => {
+        // Acción a realizar en caso de confirmar
+        const nuevosArchivos = archivosT.filter((_, i) => i !== index);
+        setArchivosT(nuevosArchivos);
+        message.success('Archivo Borrado');
+      },
+    });
+  };
 
   const renderArchivo = (archivo, index) => (
     <div
       key={index}
-      className="flex items-center bg-gray-200 p-2 mb-2 rounded-lg cursor-pointer"
-      onClick={() => alert(`Downloading ${archivo.name}`)} // Add your download logic here
+      className="flex items-center bg-gray-200 p-2 mb-2 rounded-lg cursor-pointer relative"
+      onClick={() => alert(`Downloading ${archivo.name}`)}
     >
       <img
         src={placeholderFileImage}
@@ -74,30 +235,43 @@ const Proyecto = () => {
       />
       <div>
         <p style={{ fontSize: '14px', margin: 0 }}>{archivo.name}</p>
-        <p style={{ fontSize: '12px', color: 'gray', margin: 0 }}>
-          {archivo.fileSize}
-        </p>
+        <p style={{ fontSize: '12px', color: 'gray', margin: 0 }}>{archivo.fileSize}</p>
       </div>
+      <button
+        style={{marginBottom: '2px'}}
+        className="absolute bottom-0 right-0 mt-1 mr-1 bg-red-500 text-white rounded-full"
+        onClick={(e) => {
+          e.stopPropagation(); // Evita que el click del botón dispare el evento del div padre
+          handleRemoveArchivo(index);
+        }}
+      >
+        x
+      </button>
     </div>
   );
 
-  const renderMiembro = (miembro, index) => (
-    <div key={index} className="flex flex-col items-center ">
-      <Avatar size={64} className="bg-gray-300" src={placeholderUserImage} />
-      <p>{miembro}</p>
-    </div>
-  );
+  const renderMiembro = (miembro, index) => {
+    const initials = `${miembro.nombre.charAt(0)}${miembro.apellido.charAt(0)}`;
+    return (
+      <div key={index} className="flex flex-col items-center">
+        <Avatar size={64} className="bg-gray-300">
+          {initials}
+        </Avatar>
+        <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
+          {miembro.nombre} {miembro.apellido}
+        </p>
+      </div>
+    );
+  };
 
   const renderReferente = (referente, index) => (
     <Link to="/referencia" key={index}>
-    <Card
-      key={index}
-      className="min-w-[120px] min-h-[120px] flex-shrink-0 bg-gray-300"
+      <Card
+        key={index}
+        className="min-w-[120px] min-h-[120px] flex-shrink-0 bg-gray-300"
       >
-      <img src="/images/test2.jpg" alt="descripcion" />
-
-      {/* {referente} */}
-    </Card>
+        <img src="/images/test2.jpg" alt="descripcion" />
+      </Card>
     </Link>
   );
 
@@ -107,13 +281,11 @@ const Proyecto = () => {
   };
 
   const [isModalVisible2, setIsModalVisible2] = useState(false);
-
   const handleModal2 = () => {
     setIsModalVisible2(!isModalVisible2);
   };
 
   const [isModalVisible3, setIsModalVisible3] = useState(false);
-
   const handleModal3 = () => {
     setIsModalVisible3(!isModalVisible3);
   };
@@ -123,7 +295,6 @@ const Proyecto = () => {
     setIsModalVisibleMiembro(!isModalVisibleMiembro);
   };
 
-  // Estado y funciones para la imagen del proyecto
   const [projectImage, setProjectImage] = useState(placeholderProyectImage);
   const fileInputRef = useRef(null);
 
@@ -142,7 +313,6 @@ const Proyecto = () => {
       reader.readAsDataURL(file);
       setShowButton(true);
     }
-
   };
 
   const renderTag = (tag, index) => (
@@ -152,13 +322,11 @@ const Proyecto = () => {
   );
 
   const [isModalVisible4, setIsModalVisible4] = useState(false);
-
   const handleModal4 = () => {
     setIsModalVisible4(!isModalVisible4);
   };
-  
-  const [isModalVisibleReferencia, setIsModalReferencia] = useState(false);
 
+  const [isModalVisibleReferencia, setIsModalReferencia] = useState(false);
   const handleModalReferencia = () => {
     setIsModalReferencia(!isModalVisibleReferencia);
   };
@@ -166,44 +334,31 @@ const Proyecto = () => {
   const navigate = useNavigate();
 
   const renderReferente2 = (referente) => (
-    <Col xs={24} sm={12} md={8} lg={6} key={referente.id}>
     <Card
-      onClick={() => navigate(`/Proyectos/${referente.id}/Referencia`)}
+      key={referente.id}
       hoverable
-      style={{ marginBottom: '30px' , height: '100px'}}
+      style={{ minWidth: '120px', minHeight: '120px', marginRight: '10px' }}
+      onClick={() => navigate(`/Proyectos/${referente.id}/Referencia`)}
       cover={
-        <div
-          style={{
-            width: '100%',
-            height: '100px', // Ajusta la altura según sea necesario
-            overflow: 'hidden',
-          }}
-        >
-          <img 
-            alt={referente.title}
+        <div style={{ width: '100%', height: '100px', overflow: 'hidden' }}>
+          <img
+            alt={referente.name}
             src={referente.image}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              borderBottomLeftRadius: '20px', // Asegúrate de que coincida con el contenedor
-              borderBottomRightRadius: '20px',
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </div>
       }
     >
-      <Card.Meta title={referente.title} />
+      <Card.Meta title={referente.name} />
     </Card>
-  </Col>
-);
+  );
 
-const confirmDeleteProject = () => {
-  message.success('Proyecto eliminado correctamente');
-  // Aquí deberías añadir la lógica para eliminar el proyecto
-  // Por ahora, solo mostramos un mensaje de éxito
-};
+  const confirmDeleteProject = () => {
+    message.success('Proyecto eliminado correctamente');
+    // Aquí deberías añadir la lógica para eliminar el proyecto
+  };
 
+  //const autoridad = 1; // 1 es admin, 2 dueno, 3 colaborador, 4 publico
 
   return (
     <>
@@ -218,15 +373,10 @@ const confirmDeleteProject = () => {
       </Modal>
 
       <Modal open={isModalVisible4} onCancel={handleModal4} width={'80%'}>
-        <Foro />
+        <Foro commentsIn = {comentariosT} proyectIdIn={proyecto.id} />
       </Modal>
 
-      <Modal
-        visible={isModalVisible3}
-        onCancel={handleModal3}
-        width={'40%'}
-        footer={null}
-      >
+      <Modal visible={isModalVisible3} onCancel={handleModal3} width={'40%'} footer={null}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%' }}>
           <Button
             shape="round"
@@ -263,7 +413,6 @@ const confirmDeleteProject = () => {
         width={'25%'}
         footer={null}
       >
-
         <div
           style={{
             display: 'flex',
@@ -284,126 +433,126 @@ const confirmDeleteProject = () => {
             }}
           />
           <Button
-              type="primary"
-              shape="round"
-              style={{ width: '200px', height: '40px', fontSize: '18px', marginTop: '20px'}}
-              onClick={handleModal2}
-            >
-              Aceptar<LikeOutlined />
-            </Button>
+            type="primary"
+            shape="round"
+            style={{
+              width: '200px',
+              height: '40px',
+              fontSize: '18px',
+              marginTop: '20px',
+            }}
+            onClick={handleModal2}
+          >
+            Aceptar<LikeOutlined />
+          </Button>
         </div>
+      </Modal>
+
+      <Modal
+        visible={isDescriptionModalVisible}
+        onCancel={handleDescriptionCancel}
+        onOk={handleDescriptionOk}
+        width={'50%'}
+      >
+        <Title level={4}>Descripción</Title>
+        <Input.TextArea
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          rows={4}
+          placeholder="Edita la descripción del proyecto..."
+        />
       </Modal>
 
       <div className="p-8">
         <div className="flex flex-col lg:flex-row justify-around mb-8">
           <div className="flex flex-col items-center lg:items-start mb-8 lg:mb-0 w-full lg:w-auto">
             <Title level={3} className="text-center lg:text-left">
-              Nombre Proyecto
-              <EditOutlined
-                className="ml-2"
-                size={20}
-                onClick={handleModal2}
-              />
+              {projectTitle}
+              {autoridad <= 3 && (
+                <EditOutlined className="ml-2" size={20} onClick={handleModal2} />
+              )}
             </Title>
-
-            <p className="text-center lg:text-left">16/06/2024</p>
-            <Title level={4} className="mb-2 text-center lg:text-left">
-              Imagen Opcional
-              <EditOutlined
-                className="ml-2"
-                size={20}
-                onClick={handleModal3}
-              />
-            </Title>
-            <div className="w-full lg:w-[500px] h-[500px]">
-              <img
-                src={projectImage}
-                alt="Imagen del proyecto"
-                className="w-full h-full bg-gray-300 rounded-lg"
-              />
-              <ScrollableContainer
-                items={tags}
-                renderItem={renderTag}
-                maxVisibleItems={5}
-              />
-              
-              <div  >
-                
-              <Title level={4} className="mb-2 text-center lg:text-left">
-              Comentarios
-              <MessageOutlined
-                className="ml-2"
-                size={20}
-                onClick={handleModal4}
-              />
+            <p className="text-center lg:text-left">{creacion}</p>
+            <div className="w-full lg:w-[500px] h-[500px]" style={{ position: 'relative' }}>
+              <img src={projectImage} alt="Imagen del proyecto" className="w-full h-full bg-gray-300 rounded-lg" />
+              {autoridad <= 3 && (
+                <EditOutlined
+                  className="absolute top-0 right-0 m-2 text-white bg-black rounded-full p-1"
+                  size={20}
+                  onClick={handleModal3}
+                />
+              )}
+            </div>
+            <ScrollableContainer items={tags} renderItem={renderTag} maxVisibleItems={5} />
+            <div style={{ marginTop: '20px', marginBottom: '20px', width: '100%', position: 'relative' }}>
+              <Title level={3} className="mb-2 text-center lg:text-left">
+                Descripción
+                {autoridad <= 3 && (
+                  <EditOutlined
+                    className="ml-2 cursor-pointer"
+                    onClick={showDescriptionModal}
+                    style={{ color: 'rgba(0, 0, 0, 0.45)' }}
+                  />
+                )}
               </Title>
-                
-              
-              </div>
+              <p style={{ marginBottom: '10px' }}>{description}</p>
+            </div>
+            <div>
+              <Title level={4} className="mb-2 text-center lg:text-left">
+                Comentarios
+                <MessageOutlined className="ml-2" size={20} onClick={handleModal4} />
+              </Title>
             </div>
           </div>
           <div className="flex flex-col items-start w-full lg:w-auto">
             <div className="flex flex-row justify-start text-center mb-2">
               <Title level={4} className="text-center lg:text-left mt-3">
                 Archivos
-                <PlusCircleOutlined
-                className="ml-2"
-                size={20}
-                onClick={handleModal}
-                />
+                {autoridad <= 3 && (
+                  <PlusCircleOutlined className="ml-2" size={20} onClick={handleModal} />
+                )}
               </Title>
-             
             </div>
-            <div className="w-full">
-              {archivos.map((archivo, index) => renderArchivo(archivo, index))}
+            <div className="w-full h-64 overflow-y-auto">
+              {archivosT.map((archivo, index) => renderArchivo(archivo, index))}
+              {[...Array(Math.max(0, 6 - archivos.length)).keys()].map((_, index) => (
+                <div
+                  key={`placeholder-${index}`}
+                  className="flex items-center bg-transparent p-2 mb-2 rounded-lg"
+                  style={{ height: '50px' }}
+                />
+              ))}
             </div>
             <div>
               <Title level={4} className="mt-8 text-center lg:text-left">
                 Miembros
-                <PlusCircleOutlined
-                  className="ml-2"
-                  size={20}
-                  onClick={handleModalMiembro}
-                />
+                {autoridad <= 3 && (
+                  <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalMiembro} />
+                )}
               </Title>
-              <ScrollableContainer
-                items={miembros}
-                renderItem={renderMiembro1}
-                maxVisibleItems={5}
-              />
+              <ScrollableContainer items={miembrosT} renderItem={renderMiembro} maxVisibleItems={3} isHorizontal={true} />
             </div>
             <Title level={4} className="mt-8 text-center lg:text-left">
-              Referentes
-              <PlusCircleOutlined
-                  className="ml-2"
-                  size={20}
-                  onClick={handleModalReferencia}
-                />
+              Referencias
+              {autoridad <= 3 && (
+                <PlusCircleOutlined className="ml-2" size={20} onClick={handleModalReferencia} />
+              )}
             </Title>
-            
-            <ScrollableContainer
-              items={referentes}
-              renderItem={renderReferente2}
-              maxVisibleItems={3}
-            />
-            <Title level={4} className="mt-8 text-center lg:text-left">
+            <ScrollableContainer items={referenciasT} renderItem={renderReferente2} maxVisibleItems={3} isHorizontal={true} />
+            {(autoridad === 1 || autoridad === 2) && (
+              <Title level={4} className="mt-8 text-center lg:text-left">
                 Eliminar Proyecto
-                
                 <Popconfirm
-                title="¿Estás seguro de eliminar este proyecto?"
-                onConfirm={confirmDeleteProject}
-                okText="Sí"
-                cancelText="No"
-                placement="bottom"
-              >
-                <Button
-                  type="danger"
-                  shape="circle"
-                  icon={<DeleteOutlined />}
-                  style={{ marginLeft: '10px' }}
-                />
-              </Popconfirm>
+                  title="¿Estás seguro de eliminar este proyecto?"
+                  onConfirm={confirmDeleteProject}
+                  okText="Sí"
+                  cancelText="No"
+                  placement="bottom"
+                >
+                  <Button type="danger" shape="circle" icon={<DeleteOutlined />} style={{ marginLeft: '10px' }} />
+                </Popconfirm>
               </Title>
+            )}
           </div>
         </div>
       </div>

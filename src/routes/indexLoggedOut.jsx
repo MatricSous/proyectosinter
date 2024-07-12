@@ -1,6 +1,5 @@
 import MainLayout from '../layouts/MainLayout';
 import MainLayoutTop from '../layouts/MainLayoutTop';
-import MainLayoutAdmin from '../layouts/MainLayoutAdmin';
 import Home from '../pages/Home';
 import Usuarios from '../pages/Usuarios';
 import Proyectos from '../pages/Proyectos';
@@ -17,10 +16,9 @@ import ProyectosPublicos from '../pages/Proyectopublico';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { userAuthenticated } from '../app/authenticationSlice';
-import ImageGallery from '../pages/TesterImagenes';
 
 
-//import Referencia from '../pages/Referencia';
+
 const routes = [
   {
     path: '/',
@@ -29,33 +27,23 @@ const routes = [
   },
   {
     path: '/usuarios',
-    layout: MainLayoutTop,
-    element: Usuarios,
-  },
-  {
-    path: '/PerfilAdmin',
-    layout: MainLayoutAdmin,
-    element: Perfil,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Proyectos',
-    layout: MainLayoutTop,
-    element: Proyectos,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
-    path: '/Proyecto/:id',
-    layout: MainLayoutTop,
-    element: Proyecto,
-  },
-  {
-    path: '/Proyecto/:id/Referencia',
-    layout: MainLayoutTop,
-    element: Referencia,
+    path: '/Proyectos/:id/Proyecto',
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Miembros',
-    layout: MainLayoutTop,
-    element: Miembros,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/login',
@@ -64,49 +52,40 @@ const routes = [
   },
   {
     path: '/inicio',
-    layout: MainLayoutTop,
-    element: Inicio,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Subir',
-    layout: MainLayoutTop,
-    element: Subir,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/referencia',
-    layout: MainLayoutTop,
-    element: Referencia,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Subir',
-    layout: MainLayout,
-    element: Subir,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Perfil',
-    layout: MainLayoutTop,
-    element: Perfil,
+    layout: EmptyLayout,
+    element: Login,
   },
   {
     path: '/Proyectos/:id/Proyectopublico',
     layout: MainLayoutTop,
-    element: ProyectoPublico,
+    element: Login,
   },
   {
     path: '/Proyectospublicos',
     layout: MainLayoutTop,
-    element: ProyectosPublicos,
+    element: Login,
   },
-  {
-    path: '/TestImg',
-    layout: MainLayoutTop,
-    element: ImageGallery,
-  },
-  {
-    path: '/Proyecto/:id',
-    layout: MainLayoutTop,
-    element: Proyecto,
-  },
+
 
 
 ];
