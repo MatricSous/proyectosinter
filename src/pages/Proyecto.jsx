@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Avatar, Card, Modal, Tag, Typography, Input, Button, Col, Popconfirm, message } from 'antd';
 import ScrollableContainer from '../components/ScrollableList';
-import { PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
+import {CloseOutlined, PlusCircleOutlined, EditOutlined, FileImageOutlined, LikeOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
 import UploadFile from '../components/UploadFile';
 import Miembro from '../components/Miembro';
 import Foro from '../components/Foro';
@@ -11,7 +11,7 @@ import image from '../images/test2.jpg'; // Asegúrate de que la ruta de la imag
 import { useDispatch , useSelector} from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { GetDetallesProyecto } from '../services/proyectos';
+import { GetDetallesProyecto, eliminarArchivo, eliminarProyecto} from '../services/proyectos';
 import { editarProyecto } from '../services/proyectos';
 import { ImageDB } from '../Config';
 import { uploadBytes, ref, getDownloadURL} from 'firebase/storage';
@@ -90,7 +90,8 @@ const Proyecto = () => {
     const transformedArchivos = archivos.map(archivo => ({
       name: archivo.nombre,
       fileSize: archivo.contenido.replace('.', ''), // Removing the dot from file extension
-      link: archivo.ruta
+      link: archivo.ruta,
+      id: archivo.id
     }));
     const transformedMiembros = colaboradores.map(archivo => ({
       nombre: archivo.nombre,
@@ -223,33 +224,79 @@ const Proyecto = () => {
     document.body.removeChild(link);
   };
 
-  const renderArchivo = (archivo, index) => (
-    <div
-      key={index}
-      className="flex items-center bg-gray-200 p-2 mb-2 rounded-lg cursor-pointer"
-      onClick={() => handleDownload(archivo.link, archivo.name)}
-    >
-      <img
-        src={placeholderFileImage}
-        alt="Archivo adjunto"
-        draggable="false"
-        style={{
-          width: '40px',
-          height: '40px',
-          objectFit: 'cover',
-          borderRadius: '8px',
-          userSelect: 'none',
-          pointerEvents: 'none',
-          marginRight: '10px',
-        }}
-      />
-      <div>
-        <p style={{ fontSize: '14px', margin: 0 }}>{archivo.name}</p>
-        <p style={{ fontSize: '12px', color: 'gray', margin: 0 }}>{archivo.fileSize}</p>
+  const renderArchivo = (archivo, index, autoridad) => {
+    const confirmRemove = (archivo) => {
+      Modal.confirm({
+        title: '¿Estás seguro de que deseas eliminar este archivo?',
+        content: archivo.name,
+        okText: 'Sí',
+        okType: 'danger',
+        cancelText: 'No',
+        onOk() {
+          handleRemoveArchivo(archivo);
+        },
+      });
+    };
+  
+    return (
+      <div
+        key={index}
+        className="flex items-center bg-gray-200 p-2 mb-2 rounded-lg cursor-pointer relative"
+        onClick={() => handleDownload(archivo.link, archivo.name)}
+      >
+        <img
+          src={placeholderFileImage}
+          alt="Archivo adjunto"
+          draggable="false"
+          style={{
+            width: '40px',
+            height: '40px',
+            objectFit: 'cover',
+            borderRadius: '8px',
+            userSelect: 'none',
+            pointerEvents: 'none',
+            marginRight: '10px',
+          }}
+        />
+        <div>
+          <p style={{ fontSize: '14px', margin: 0 }}>{archivo.name}</p>
+          <p style={{ fontSize: '12px', color: 'gray', margin: 0 }}>{archivo.fileSize}</p>
+        </div>
+        {autoridad <= 3 && (
+          <CloseOutlined
+            style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              color: '#b22222',
+              cursor: 'pointer',
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering the onClick of the parent div
+              confirmRemove(archivo);
+            }}
+          />
+        )}
       </div>
-    </div>
-  );
+    );
+  };
+  // Example function to handle the removal of the archivo
+  const handleRemoveArchivo = async (index) => {
+    // Remove the archivo from the list
 
+    console.log(index)
+
+    const deleteFile = {
+      "id_proyecto": proyecto.id,
+      "id_archivo": index.id
+    };
+
+    console.log(deleteFile)
+
+    await eliminarArchivo(dispatch, deleteFile);
+    window.location.reload();
+
+  };
   const renderMiembro = (miembro, index) => {
     const initials = `${miembro.nombre.charAt(0)}${miembro.apellido.charAt(0)}`;
     return (
@@ -411,7 +458,7 @@ const Proyecto = () => {
       key={referente.id}
       hoverable
       style={{ minWidth: '120px', minHeight: '120px', marginRight: '10px' }}
-      onClick={() => navigate(`/Proyectos/${referente.id}/Referencia`)}
+      onClick={() => navigate(`/Proyecto/Referencia/${referente.id}`)}
       cover={
         <div style={{ width: '100%', height: '100px', overflow: 'hidden' }}>
           <img
@@ -427,7 +474,13 @@ const Proyecto = () => {
   );
 
   const confirmDeleteProject = () => {
+
+    const data = {
+      id: proyecto.id
+    }
+    eliminarProyecto(dispatch, data)
     message.success('Proyecto eliminado correctamente');
+    navigate('/Proyectos')
     // Aquí deberías añadir la lógica para eliminar el proyecto
   };
 
@@ -442,7 +495,7 @@ const Proyecto = () => {
         <Referencia membersIn = {referencias} idProyectoIn={proyecto.id} />
       </Modal>
       <Modal open={isModalVisibleMiembro} onCancel={handleModalMiembro} width={'80%'}>
-        <Miembro />
+        <Miembro idProyectoIn={proyecto.id} />
       </Modal>
 
       <Modal open={isModalVisible4} onCancel={handleModal4} width={'80%'}>
@@ -600,7 +653,7 @@ const Proyecto = () => {
               </Title>
             </div>
             <div className="w-full h-64 overflow-y-auto">
-              {archivosT.map((archivo, index) => renderArchivo(archivo, index))}
+              {archivosT.map((archivo, index) => renderArchivo(archivo, index, autoridad))}
               {[...Array(Math.max(0, 6 - archivos.length)).keys()].map((_, index) => (
                 <div
                   key={`placeholder-${index}`}

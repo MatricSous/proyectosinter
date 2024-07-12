@@ -61,8 +61,8 @@ const ScrollableContainer = ({ items, renderItem, maxVisibleItems, isHorizontal 
       onTouchMove={handleTouchMove}
       style={{
         overflowY: isHorizontal ? 'hidden' : 'auto',
-        maxHeight: isHorizontal ? 'auto' : 'calc(100px * 4)', // Limitar altura a 4 elementos
-        maxWidth: isHorizontal ? '100%' : 'unset',
+        maxHeight: isHorizontal ? 'auto' : `calc(600px * ${maxVisibleItems})`,
+        maxWidth: isHorizontal ? `calc(120px * ${maxVisibleItems})` : '100%',
       }}
     >
       {items.map((item, index) => renderItem(item, index))}

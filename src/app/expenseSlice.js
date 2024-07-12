@@ -11,7 +11,9 @@ export const expensesSlice = createSlice({
     name: 'proyectos',
     initialState: {
         proyectosArray: [],
-        detallesProyecto: []
+        proyectosArrayUser: [],
+        detallesProyecto: [],
+        referencia: [],
     },
     reducers: {
         newProyecto: (state, action) => {
@@ -43,10 +45,46 @@ export const expensesSlice = createSlice({
             
         },
 
+        setProyectoUsuarioUser: (state, action) => {
+            console.log("set");
+            console.log('Payload:', action.payload);
+            const updatedProyectosArray = action.payload;
+            console.log('Updated proyectosArray:', updatedProyectosArray);
+            return {
+                ...state,
+                proyectosArrayUser: updatedProyectosArray,
+            };
+
+            
+        },
+
+
+        setDetalleReferencia: (state, action) => {
+            console.log("set");
+            console.log('Payload:', action.payload);
+            const updatedProyectosArray = action.payload;
+            console.log('Updated proyectosArray:', updatedProyectosArray);
+            return {
+                ...state,
+                referencia: updatedProyectosArray,
+            };
+
+            
+        },
+
+
         newComentario: (state, action) => {
             console.log(action.payload)
             const { idProyecto, contenido, ...rest } = action.payload;
             const newExpense = { idProyecto, contenido, ...rest };
+            return { ...state, expenses: [newExpense, ...state.expenses] };
+        },
+
+        
+        newColaborador: (state, action) => {
+            console.log(action.payload)
+            const { idProyecto, mail, ...rest } = action.payload;
+            const newExpense = { idProyecto, mail, ...rest };
             return { ...state, expenses: [newExpense, ...state.expenses] };
         },
         newReferencia: (state, action) => {
@@ -93,6 +131,6 @@ export const expensesSlice = createSlice({
     }
 });
 
-export const {newProyecto, deleteReferencia, newArchivo, newReferencia, editProyecto, newComentario, setDetallesProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
+export const {newProyecto,setProyectoUsuarioUser, setDetalleReferencia,newColaborador, deleteReferencia, newArchivo, newReferencia, editProyecto, newComentario, setDetallesProyecto, setProyectoUsuario, editExpense, deleteExpense } = expensesSlice.actions;
 
 export default expensesSlice.reducer;

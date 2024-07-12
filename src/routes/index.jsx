@@ -48,7 +48,7 @@ const routes = [
     element: Proyecto,
   },
   {
-    path: '/Proyecto/:id/Referencia',
+    path: '/Proyecto/Referencia/:id',
     layout: MainLayoutTop,
     element: Referencia,
   },

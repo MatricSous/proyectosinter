@@ -201,7 +201,7 @@ const Proyectos = () => {
           {currentProjects.map((project) => (
             <Col xs={24} sm={12} md={8} lg={6} key={project.id}>
               <Card
-                onClick={() => navigate(`/Proyectos/${project.id}/Proyectopublico`)}
+                onClick={() => navigate(`/Proyecto/${project.id}`)}
                 hoverable
                 style={{ marginBottom: '30px' }} // Add margin bottom to increase vertical spacing
                 cover={

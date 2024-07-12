@@ -1,9 +1,27 @@
-import React, { useState } from 'react';
-import { Avatar, Row, Col, Modal, Input, Button, Space } from 'antd';
+import React, { useState, useEffect } from 'react';
 import { UserAddOutlined, CloseOutlined } from '@ant-design/icons';
+import { Avatar, Modal, Input, Button, Col, Row } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { GetDetallesProyecto, añadirColaborador, eliminarColaborador } from '../services/proyectos';
+import ScrollableContainer from '../components/ScrollableList';
 
-const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
-  const initials = `${member.nombre.charAt(0)}${member.apellido.charAt(0)}`;
+
+const UserCard = ({ member, onInviteClick, onRemoveClick, autoridad }) => {
+  const initials = `${member.nombre ? member.nombre.charAt(0) : ''}${member.apellido ? member.apellido.charAt(0) : ''}`;
+
+  const confirmRemove = (member) => {
+    Modal.confirm({
+      title: '¿Estás seguro de que deseas eliminar este miembro?',
+      content: member.nombre + ' ' + member.apellido,
+      okText: 'Sí',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        onRemoveClick(member);
+      },
+    });
+  };
 
   return (
     <Col style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -18,20 +36,21 @@ const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
         ) : (
           <Avatar
             className="w-full h-full p-10"
-            style={{ backgroundColor: '#d9d9d9', fontSize: '100px' }}
+            style={{ backgroundColor: '#d9d9d9', fontSize: '100px', width: '200px', height: '200px' }}
           >
             {initials}
           </Avatar>
         )}
         <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '18px' }}>
           {member.nombre} {member.apellido}
-          {!member.isInvite && (
-            <Space style={{ position: 'absolute', top: 0, right: 0 }}>
-              <CloseOutlined
-                style={{ fontSize: '18px', color: 'red', cursor: 'pointer' }}
-                onClick={() => onRemoveClick(member.id)}
-              />
-            </Space>
+          {!member.isInvite && autoridad <= 3 && (
+            <CloseOutlined
+              style={{ fontSize: '18px', color: 'red', cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the onClick of the parent div
+                confirmRemove(member);
+              }}
+            />
           )}
         </div>
       </div>
@@ -39,13 +58,28 @@ const UserCard = ({ member, onInviteClick, onRemoveClick }) => {
   );
 };
 
-const Miembros = () => {
+const Miembros = (idProyectoIn) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [members, setMembers] = useState([
-    { id: 1, nombre: 'Nombre', apellido: 'Usuario1', isInvite: false },
-    { id: 2, nombre: 'Nombre', apellido: 'Usuario2', isInvite: false },
-  ]); // Ejemplo de lista de miembros inicial
   const [email, setEmail] = useState('');
+  const [miembrosT, setMiembrosT] = useState([]);
+  const dispatch = useDispatch();
+  const detallesProyecto = useSelector(state => state.expensesSlice.detallesProyecto);
+  const { id } = useParams();
+  const autoridad = 2; // This should be retrieved from the context or state
+
+  useEffect(() => {
+    const fetchProyectoDetails = async () => {
+      const idData = { id: id };
+      await GetDetallesProyecto(dispatch, idData);
+    };
+    fetchProyectoDetails();
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (detallesProyecto) {
+      setMiembrosT(detallesProyecto.colaboradores || []);
+    }
+  }, [detallesProyecto]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -60,30 +94,49 @@ const Miembros = () => {
     setIsModalVisible(false);
   };
 
-  const addMember = (email) => {
-    const newMember = { id: members.length + 1, nombre: 'Invitado', apellido: '', email, isInvite: false };
-    setMembers([...members, newMember]);
+  const addMember = async (email) => {
+    if (!email) {
+      return;
+    }
+
+    console.log("id",idProyectoIn);
+
+    const newMember = { correo: email, idProyecto: idProyectoIn.idProyectoIn};
+    await añadirColaborador(dispatch, newMember);
+    window.location.reload();
   };
 
-  const removeMember = (id) => {
-    const updatedMembers = members.filter(member => member.id !== id);
-    setMembers(updatedMembers);
+  const removeMember = async (miembro) => {
+    console.log(`Removing member: ${miembro.nombre} ${miembro.apellidoPat} with email ${miembro.mail}`);
+    console.log(idProyectoIn.idProyectoIn)
+    const removingMember = {correo: miembro.mail, idProyecto: idProyectoIn.idProyectoIn}
+    const updatedMembers = miembrosT.filter(member => member.mail !== miembro.mail);
+    setMiembrosT(updatedMembers);
+    await eliminarColaborador(dispatch, removingMember)
+    window.location.reload()
   };
 
   return (
     <div style={{ padding: '50px 20px', backgroundColor: '#fafafa' }}>
       <Row justify="space-around" align="middle">
-        {members.map(member => (
-          <UserCard
-            key={member.id}
-            member={member}
-            onRemoveClick={removeMember}
-            onInviteClick={showModal}
-          />
-        ))}
+        <ScrollableContainer
+          items={miembrosT}
+          renderItem={(miembro, index) => (
+            <UserCard
+              key={index}
+              member={miembro}
+              onInviteClick={showModal}
+              onRemoveClick={removeMember}
+              autoridad={autoridad}
+            />
+          )}
+          maxVisibleItems={5}
+          isHorizontal={true}
+        />
         <UserCard
           member={{ id: 'invite', nombre: 'Invitar', apellido: 'Usuario', isInvite: true }}
           onInviteClick={showModal}
+          autoridad={autoridad}
         />
       </Row>
       <Modal
@@ -92,7 +145,7 @@ const Miembros = () => {
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
-        width={800} // Ajusta el ancho del modal aquí
+        width={800}
       >
         <Input
           placeholder="Correo Electrónico"

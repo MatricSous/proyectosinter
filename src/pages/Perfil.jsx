@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { Avatar, Row, Col, Modal, Input, Button } from 'antd';
 import { UserAddOutlined, LogoutOutlined } from '@ant-design/icons';
 import { LogOut } from '../services/authentication';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
+
+
 
 const UserCard = ({ firstName, lastName, isInvite, onInviteClick, onLogoutClick }) => {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
@@ -48,12 +52,26 @@ const UserCard = ({ firstName, lastName, isInvite, onInviteClick, onLogoutClick 
 };
 
 const Perfil = () => {
+
+  const [firstName, setFirstName] = useState('Saji'); // cambiar nombre y apellido
+  const [lastName, setLastName] = useState('Za');  // cambiar nombre y apellido
+
+  useEffect(() => {
+    // Function to fetch proyecto details
+    const fetchName = async () => {
+        const token = localStorage.getItem('ACCESS_TOKEN');
+        const tokenDec = jwtDecode(token);
+        const name = tokenDec.given_name;
+        const nameSplit = name.split(" ");
+        setFirstName(nameSplit[0]);
+        setLastName(nameSplit[1]+ " " + nameSplit[2]);
+    }; 
+    fetchName();// Execute the fetch on component mount or when 'dispatch' changes
+  }, []);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [firstName, setFirstName] = useState('Saji'); // cambiar nombre y apellido
-  const [lastName, setLastName] = useState('Za');  // cambiar nombre y apellido
 
   const logoutUser = async () => {
     try {

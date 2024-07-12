@@ -1,5 +1,5 @@
 import {editProyecto,
-    setExpenses, deleteReferencia, newReferencia, newArchivo, setProyectoUsuario, setDetallesProyecto, newComentario, newProyecto, editExpense, deleteExpense,
+    setExpenses, setDetalleReferencia, setProyectoUsuarioUser, newColaborador, deleteReferencia, newReferencia, newArchivo, setProyectoUsuario, setDetallesProyecto, newComentario, newProyecto, editExpense, deleteExpense,
     setExpensesError, editExpenseError, newProyectoError, deleteExpenseError
 } from '../app/expenseSlice';
 import axios from 'axios';
@@ -30,7 +30,20 @@ export const GetProyectosUsuario = async (dispatch) => {
     try {
         // api call
         const { data } = await axiosInstance.get('/ProyectosUsuario');
-        dispatch(setProyectoUsuario(data));
+        dispatch(setProyectoUsuarioUser(data));
+        console.log(data)
+    } catch {
+        dispatch(setExpensesError());
+    }
+}
+
+
+export const GetDetallesReferencia= async (dispatch, dataIn) => {
+    try {
+        // api call
+
+        const { data } = await axiosInstance.post('/GetDetalleReferencia', dataIn);
+        dispatch(setDetalleReferencia(data));
         console.log(data)
     } catch {
         dispatch(setExpensesError());
@@ -93,6 +106,17 @@ export const comentar = async (dispatch, comentario) => {
     }
 }
 
+export const añadirColaborador = async (dispatch, member) => {
+    try {
+        // api call
+        console.log(member)
+        const { data } = await axiosInstance.post('/añadirColaborador', member);
+        dispatch(newColaborador(data));
+    } catch {
+        dispatch(newProyectoError());
+    }
+}
+
 export const GetDetallesProyecto = async (dispatch, id) => {
     try {
         // api call
@@ -124,7 +148,32 @@ export const eliminarReferencia = async (dispatch, expense) => {
     }
 }
 
-export const DeleteExpense = async (dispatch, expense) => {
+
+export const eliminarArchivo = async (dispatch, expense) => {
+    try {
+        // api call
+        console.log(expense)
+        await axiosInstance.delete('eliminarArchivo', { data: { ...expense }});
+        dispatch(deleteReferencia(expense));
+    } catch {
+        dispatch(deleteExpenseError());
+    }
+}
+
+export const eliminarColaborador = async (dispatch, expense) => {
+    try {
+        // api call
+        console.log(expense)
+        await axiosInstance.delete('eliminarColaborador', { data: { ...expense }});
+        dispatch(deleteReferencia(expense));
+    } catch {
+        dispatch(deleteExpenseError());
+    }
+}
+
+
+
+export const eliminarProyecto = async (dispatch, expense) => {
     try {
         // api call
         await axiosInstance.delete('', { data: { ...expense } });

@@ -18,7 +18,7 @@ const Proyectos = () => {
   
   const [transformed, setTransformed] = useState([]);
   const dispatch = useDispatch();
-  const proyectos = useSelector(state => state.expensesSlice.proyectosArray); // Corrected state path
+  const proyectos = useSelector(state => state.expensesSlice.proyectosArrayUser); // Corrected state path
   const [currentPage, setCurrentPage] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [position, setPosition] = useState('end');
@@ -125,7 +125,6 @@ const Proyectos = () => {
         id: 0, // You may need to generate or handle this dynamically
         titulo: projectTitle, // Adjust based on user input
         descripcion: "string", // You may need to implement the logic for project description
-        creacion: new Date().toISOString(), // Current timestamp
         foto: imgRef, // Assuming imgRef is the URL or reference to the uploaded photo
         activo: true
       },
@@ -146,7 +145,7 @@ const Proyectos = () => {
     setProjectTitle('');
     setTags([]);
     setIsModalVisible(false);
-    window.location.reload();
+
     //window.location.href = '/proyecto#/Proyectos/1/Proyecto';
   };
 
